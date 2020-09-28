@@ -3,7 +3,7 @@
         <van-nav-bar title="医美"   class="pageNav" />
       	<div class="pageContent">
     	  	<!-- 搜索框 -->
-            <van-search class="roundborder"  v-model="searchValue" placeholder="需要什么商品" />
+            <van-search class="roundborder"  v-model="searchValue" placeholder="需要什么商品" @focus="gosearch" />
             
             <!-- 头部导航 -->
   <!--   	  	<van-tabs v-model="active" @click="tabClick">
@@ -16,7 +16,7 @@
             <!-- 轮播 -->
             <van-swipe class="my-swipe" :autoplay="3000" indicator-color="#999999">
               <van-swipe-item v-for=" pic in swipeList " :key="pic.url">
-                  <van-image width="100%"  :src="pic.pic" @click="imgClick(pic.url)" />
+                  <van-image width="100%"  :src="pic.images" @click="imgClick(pic.shopId)" />
               </van-swipe-item>
             </van-swipe>
             
@@ -40,7 +40,7 @@
             <div class="activitiesZone">
                 <div class="activitiesZoneName">会员专区</div>
                 <div class="activities">
-                    <div class="activityItem" v-for="activity in activities" :key="activity.url" @click="activityClick(activity.url)">
+                    <div class="activityItem" v-for="activity in activities" :key="activity.pageType" @click="activityClick(activity)">
                         <van-image width="100%" :src="activity.pic" />
                         <div class="activityWordsWrap">
                             <div class="activityWordsUp">{{ activity.upWords }}<van-icon name="play" size="12px" color="white" /></div>
@@ -82,16 +82,19 @@
 
 import product from '@/components/product.vue'
 
-import Vue from 'vue'
+// import Vue from 'vue'
 import store from '@/store'
 
 // // 手动引入vant单个组件
 // import Button from 'vant/lib/button';
 // import 'vant/lib/button/style';
 
-import Vant from 'vant'
-import 'vant/lib/index.css'
-Vue.use(Vant)
+// import Vant from 'vant'
+// import 'vant/lib/index.css'
+// Vue.use(Vant)
+
+import { clist } from '@/api/carouselImage'
+import { plist,ppage } from '@/api/project'
 
 export default {
   	name: '',
@@ -101,9 +104,9 @@ export default {
             searchValue:"",
 			active: 0,//第一个滑窗激活窗口
             swipeList:[
-                {pic:require('../assets/imgs/13.png'),url:"11"},
-                {pic:require("../assets/imgs/15.png"),url:"22"},
-                {pic:require("../assets/imgs/16.png"),url:"33"},
+                // {pic:require('../assets/imgs/13.png'),url:"11"},
+                // {pic:require("../assets/imgs/15.png"),url:"22"},
+                // {pic:require("../assets/imgs/16.png"),url:"33"},
             ], //第一个滑窗数据
             swipeList1:[
                 {url:"11",name:"O栈",pic:require('../assets/imgs/171.png')},
@@ -120,34 +123,34 @@ export default {
             swipeList2:[{url:"11",name:"O栈",pic:require('../assets/imgs/171.png')},],//第二个滑窗第二屏数据
 
             activities:[
-                {pic:require("../assets/imgs/24.png"),url:"111",upWords:"VIP专区",downWords:"享受会员福利"},
-                {pic:require("../assets/imgs/25.png"),url:"222",upWords:"特价专区",downWords:"优惠价格随你挑"},
-                {pic:require("../assets/imgs/26.png"),url:"333",upWords:"钻石会员专区",downWords:"最高福利专区"},
+                {pic:require("../assets/imgs/24.png"),upWords:"VIP专区",downWords:"享受会员福利",pageType:"vip",pageTitle:"VIP专区",type:2,},
+                {pic:require("../assets/imgs/25.png"),upWords:"特价专区",downWords:"优惠价格随你挑",pageType:"specialOffer",pageTitle:"特价专区",type:1,},
+                {pic:require("../assets/imgs/26.png"),upWords:"钻石会员专区",downWords:"最高福利专区",pageType:"diamond",pageTitle:"钻石会员专区",type:3,},
             ],//活动专区数据
 
             bottomActive:0,
 
             shoppingList:[
-                {url:"",name:"推荐"},
-                {url:"",name:"眼部"},
-                {url:"",name:"鼻部"},
-                {url:"",name:"胸部"},
-                {url:"",name:"玻尿酸"},
-                {url:"",name:"除皱"},
-                {url:"",name:"鼻部"},
-                {url:"",name:"胸部"},
-                {url:"",name:"玻尿酸"},
-                {url:"",name:"除皱"},
+                // {url:"",name:"推荐"},
+                // {url:"",name:"眼部"},
+                // {url:"",name:"鼻部"},
+                // {url:"",name:"胸部"},
+                // {url:"",name:"玻尿酸"},
+                // {url:"",name:"除皱"},
+                // {url:"",name:"鼻部"},
+                // {url:"",name:"胸部"},
+                // {url:"",name:"玻尿酸"},
+                // {url:"",name:"除皱"},
             ],
-            activeList:"推荐",
+            activeList:null,
 
             products:[
-                {name:"【奥昵玻尿酸0.5ml】守护 年轻的秘密",price:"1400.00",company:"亚太美立方医疗美容",pic:require("../assets/imgs/23.png"),id:1},
-                {name:"【奥昵玻尿酸0.5ml】守护 年轻的秘密",price:"1400.00",company:"亚太美立方医疗美容",pic:require("../assets/imgs/22.png"),id:2},
-                {name:"【奥昵玻尿酸0.5ml】守护 年轻的秘密",price:"1400.00",company:"亚太美立方医疗美容",pic:require("../assets/imgs/21.png"),id:3},
-                {name:"【奥昵玻尿酸0.5ml】守护 年轻的秘密",price:"1400.00",company:"亚太美立方医疗美容",pic:require("../assets/imgs/18.png"),id:4},
-                {name:"【奥昵玻尿酸0.5ml】守护 年轻的秘密",price:"1400.00",company:"亚太美立方医疗美容",pic:require("../assets/imgs/17.png"),id:5},
-                {name:"【奥昵玻尿酸0.5ml】守护 年轻的秘密",price:"1400.00",company:"亚太美立方医疗美容",pic:require("../assets/imgs/19.png"),id:6},
+                // {name:"【奥昵玻尿酸0.5ml】守护 年轻的秘密",price:"1400.00",company:"亚太美立方医疗美容",pic:require("../assets/imgs/23.png"),id:1},
+                // {name:"【奥昵玻尿酸0.5ml】守护 年轻的秘密",price:"1400.00",company:"亚太美立方医疗美容",pic:require("../assets/imgs/22.png"),id:2},
+                // {name:"【奥昵玻尿酸0.5ml】守护 年轻的秘密",price:"1400.00",company:"亚太美立方医疗美容",pic:require("../assets/imgs/21.png"),id:3},
+                // {name:"【奥昵玻尿酸0.5ml】守护 年轻的秘密",price:"1400.00",company:"亚太美立方医疗美容",pic:require("../assets/imgs/18.png"),id:4},
+                // {name:"【奥昵玻尿酸0.5ml】守护 年轻的秘密",price:"1400.00",company:"亚太美立方医疗美容",pic:require("../assets/imgs/17.png"),id:5},
+                // {name:"【奥昵玻尿酸0.5ml】守护 年轻的秘密",price:"1400.00",company:"亚太美立方医疗美容",pic:require("../assets/imgs/19.png"),id:6},
                 
             ],
             // 测试用
@@ -167,7 +170,8 @@ export default {
             loading:false,
             finished:false,
 
-
+            pageNum:1,
+            total:0,
 		}
   	},
   	computed:{
@@ -192,48 +196,91 @@ export default {
             }
   			
   		},
+
+        gosearch(){
+            this.$router.push({ 
+                name: 'search',
+                query: { type:"project" }
+            })
+        },
+
         imgClick(url){
             console.log(url)
         },
         swipeTypeClick(url){
             console.log(url)
         },
-        activityClick(url){
-            console.log(url)
+        activityClick(active){
+            var that=this;
+
+            ppage({
+                start:1,
+                limit:1,
+                type:active.type
+            }).then(function(response){
+                // console.log(response)
+                that.$router.push({ 
+                    name: 'projectSearchList',
+                    query: { 
+                        pageType:active.pageType,
+                        pageTitle:active.pageTitle
+                    }
+                })
+            }).catch(function(error){
+                console.log(error)
+            })
+
+            
         },
 
         tabClickShoppingList(name, title){
-            if(this.activeList==title){
-                // 点击当前项
-                return
-            }
-            this.updateProducts(this.shoppingList[name])
+            // console.log(name)
+            // console.log(title)
+            // if(this.activeList==title){
+            //     // 点击当前项
+            //     return
+            // }
+            
 
-            console.log(name)
-            console.log(title)
-        },
-        updateProducts(url){
+
             this.products.length=0;
-            // 根据url去获取分类商品列表,更新products
+            this.pageNum=1;
+            this.finished=false;
+            this.getData();
         },
+
         tabClickBottom(index){
             // 底部跳转
  
             this.$router.replace(this.bottomButtonList[index].url)
 
         },
-        moreInfo(){
-            console.log("aa")
-        },
+        // moreInfo(){
+        //     console.log("aa")
+        // },
 
         onLoad(){
             // 列表下拉加载
-            console.log("aax")
+            // console.log("aax")
             var that=this;
-            setTimeout(function(){
-                that.products=that.products.concat(that.addproducts)
+            // setTimeout(function(){
+            //     that.products=that.products.concat(that.addproducts)
+            //     that.loading=false
+            // },5000)
+
+            
+            this.pageNum+=1;
+            this.getData(this.pageNum).then(function(){
+                // console.log(that.products.length)
+                    // console.log(that.total)
                 that.loading=false
-            },5000)
+                if(that.products.length==that.total){
+                    that.finished=true
+                    return
+                }
+
+
+            });
         },
 
         clickProduct(product){
@@ -247,7 +294,49 @@ export default {
         },
         init(){
             // 初始化界面数据
+            var that=this;
+            // 初始化轮播图
+            var f1=clist().then(function(response){
+                // console.log(response)
+                that.swipeList=response.result
+            })
+
+            var f2=plist().then(function(response){
+                // console.log(response)
+                that.shoppingList=response.result
+                if(response.result.length>0){
+                    that.activeList=response.result[0].name
+                }
+                
+            })
+            this.axios.all([f1,f2]).then(function(){
+                that.getData()
+            })
+
+        },
+        getData(pageNum){
+            var that=this;
+            
+            var category=""
+            if(this.shoppingList.length==0){
+                return
+            }
+            var obj=this.shoppingList.find(function(o){ return o.name==that.activeList})
+            category=obj.id
+
+            var data={
+                start:pageNum||1,
+                limit:10,
+                category:category
+            }
+
+            return ppage(data).then(function(response){
+                // console.log(response)
+                that.total=response.result.total
+                that.products=that.products.concat(response.result.items)
+            })
         }
+
   	},
   	mounted(){
         this.init()

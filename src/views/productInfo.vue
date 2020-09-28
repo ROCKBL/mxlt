@@ -1,6 +1,6 @@
 <template>
 	<div class="">
-		<van-nav-bar :title="productName"  left-arrow class="pageNavNative" @click-left="onClickLeft" />
+		<van-nav-bar :title="productInfo.name"  left-arrow class="pageNavNative" @click-left="onClickLeft" />
 
 		<div>
 			<van-swipe @change="onChange" class="productInfoSwipe">
@@ -19,10 +19,12 @@
 				<div class="productInfoContent_row_one_left">
 					<div class="orderPrice">
 						<div class="marginRow">预约价：￥</div>
-						<div>10.00</div>
+						<!-- <div>{{ productInfo.subsPrice.toFixed(2) }}</div> -->
+						<div>{{ Number(productInfo.subsPrice).toFixed(2) }}</div>
 					</div>
-					<div class="grayWords marginRow">优惠价￥1400.00</div>
-					<div class="productName marginRow">【奥昵玻尿酸0.5ml】守护年轻的秘密</div>
+					<!-- <div class="grayWords marginRow">优惠价￥{{ productInfo.couponPrice }}</div> -->
+					<div class="grayWords marginRow">优惠价￥{{ Number(productInfo.couponPrice).toFixed(2) }}</div>
+					<div class="productName marginRow">{{ productInfo.name }}</div>
 				</div>
 				<div class="productInfoContent_row_one_right">
 					<div><svg t="1597644778339" class="icon" viewBox="0 0 1051 1024" version="1.1" xmlns="http://www.w3.org/2000/svg" p-id="2892" width="32" height="32"><path d="M848.392 73.998 848.393 74c-75.553 0-136.8 61.915-136.8 138.254 0 8.07 0.728 15.974 2.068 23.661L308.055 405.784c-24.957-33.531-64.561-55.276-109.254-55.276-75.531 0-136.8 61.915-136.8 138.346 0 76.615 61.269 138.508 136.8 138.508 36.985 0 70.479-14.936 95.087-39.077l259.346 188.804c-7.955 17.545-12.433 37.059-12.433 57.642 0 76.385 61.015 138.277 136.546 138.277s136.8-61.915 136.8-138.277c0-76.338-61.269-138.231-136.8-138.231-33.584 0-64.276 12.326-88.017 32.651L326.754 537.996c5.707-15.259 8.846-31.814 8.846-49.119 0-9.735-1.067-19.194-2.988-28.328l403.774-169.102c24.721 35.677 65.587 59.082 111.983 59.082 75.553 0 136.8-61.915 136.8-138.277C985.191 135.913 923.947 73.998 848.392 73.998zM198.822 565.97c-42.466 0-77-34.471-77-77.068 0-42.443 34.534-76.932 77-76.932s77 34.471 77 76.932C275.822 531.465 241.288 565.97 198.822 565.97zM677.379 757.788c42.485 0 77.035 34.529 77.035 76.992 0 42.463-34.549 77.008-77.035 77.008s-76.965-34.546-76.965-77.008C600.414 792.317 634.912 757.788 677.379 757.788zM848.393 289.289c-42.466 0-77-34.546-77-77.008 0-42.462 34.534-76.992 77-76.992 42.466 0 77 34.529 77 76.992C925.393 254.744 890.859 289.289 848.393 289.289z" p-id="2893" fill="#FF8C34"></path></svg></div>
@@ -33,29 +35,32 @@
 				<div style="display: flex;align-items: center;">
 					<!-- <svg style="margin-right: 5px;" t="1597647576172" class="icon" viewBox="0 0 1024 1024" version="1.1" xmlns="http://www.w3.org/2000/svg" p-id="4647" width="10" height="10"><path d="M0 505.6c0-60.8 22.4-115.2 67.2-163.2 9.6-9.6 19.2-22.4 25.6-32C153.6 233.6 224 166.4 297.6 102.4c22.4-19.2 41.6-38.4 64-54.4 32-25.6 70.4-41.6 115.2-48 76.8-9.6 144 12.8 201.6 67.2 22.4 19.2 44.8 38.4 70.4 57.6 73.6 64 140.8 131.2 198.4 208 9.6 12.8 22.4 25.6 32 41.6 35.2 51.2 48 112 38.4 172.8-6.4 51.2-28.8 92.8-64 131.2L896 745.6c-41.6 48-83.2 92.8-131.2 134.4-25.6 22.4-51.2 41.6-76.8 64-16 12.8-28.8 25.6-44.8 35.2-54.4 35.2-112 48-176 38.4-51.2-6.4-92.8-28.8-131.2-64-9.6-9.6-19.2-16-32-25.6-64-51.2-124.8-108.8-179.2-172.8-19.2-25.6-41.6-48-60.8-73.6-3.2-9.6-16-25.6-25.6-41.6C12.8 601.6 0 556.8 0 505.6z m425.6 92.8V800c0 22.4 12.8 35.2 35.2 35.2h102.4c6.4 0 12.8-3.2 16-6.4 12.8-12.8 19.2-28.8 19.2-48v-176c0-6.4 0-6.4 6.4-6.4h201.6c16 0 28.8-12.8 32-28.8v-105.6c0-6.4-3.2-12.8-6.4-19.2-6.4-9.6-19.2-12.8-32-12.8h-201.6v-6.4-195.2c0-25.6-12.8-38.4-38.4-38.4h-96c-6.4 0-12.8 0-19.2 3.2-12.8 6.4-19.2 19.2-19.2 32v201.6H224c-22.4 0-35.2 12.8-35.2 35.2v99.2c0 9.6 3.2 16 6.4 22.4 6.4 9.6 19.2 12.8 32 12.8h198.4z" fill="#999999" p-id="4648"></path></svg> -->
 					<van-icon class="iconfont " class-prefix='icon' name='yiyuan' style="margin-right: 5px;" size="10" />
-					亚太美立方医疗美容
+					{{ productInfo.hospitalName }}
 				</div>
-				<div>已预约32</div>
+				<div>已预约{{ productInfo.salesVolume+productInfo.virtualSales }}</div>
 			</div>
 			<van-divider :style="{ borderColor:'rgba(0,0,0,0.2)'}" />
 
 			<div class="productInfoContent_row marginRow productInfoContent_row_three">
 				<div class="productInfoContent_row_three_left">
-					<van-image round width="48px" height="48px" src="https://img.yzcdn.cn/vant/cat.jpeg"/>
+					<van-image round width="48px" height="48px" :src="productInfo.hospitalImages"/>
 					<div class="hospitalInfo">
-						<div class="hospitalInfoName">亚太美立方医疗美容</div>
+						<div class="hospitalInfoName">{{ productInfo.hospitalName }}</div>
 						<div class="hospitalInfoRate marginRow">
-							<div class="hospitalInfoRateLabel">评分</div>
-							<div class="hospitalInfoRateNum">5分高</div>
+							<!-- <div class="hospitalInfoRateLabel">评分</div> -->
+							<!-- <div class="hospitalInfoRateNum">5分高</div> -->
 							<div class="hospitalInfoRateIcon">
 								<van-icon class="iconfont " class-prefix='icon' name='yiyuan' style="margin-right: 5px;" size="10" />
 								<!-- <svg style="margin-right: 5px;" t="1597647576172" class="icon" viewBox="0 0 1024 1024" version="1.1" xmlns="http://www.w3.org/2000/svg" p-id="4647" width="10" height="10"><path d="M0 505.6c0-60.8 22.4-115.2 67.2-163.2 9.6-9.6 19.2-22.4 25.6-32C153.6 233.6 224 166.4 297.6 102.4c22.4-19.2 41.6-38.4 64-54.4 32-25.6 70.4-41.6 115.2-48 76.8-9.6 144 12.8 201.6 67.2 22.4 19.2 44.8 38.4 70.4 57.6 73.6 64 140.8 131.2 198.4 208 9.6 12.8 22.4 25.6 32 41.6 35.2 51.2 48 112 38.4 172.8-6.4 51.2-28.8 92.8-64 131.2L896 745.6c-41.6 48-83.2 92.8-131.2 134.4-25.6 22.4-51.2 41.6-76.8 64-16 12.8-28.8 25.6-44.8 35.2-54.4 35.2-112 48-176 38.4-51.2-6.4-92.8-28.8-131.2-64-9.6-9.6-19.2-16-32-25.6-64-51.2-124.8-108.8-179.2-172.8-19.2-25.6-41.6-48-60.8-73.6-3.2-9.6-16-25.6-25.6-41.6C12.8 601.6 0 556.8 0 505.6z m425.6 92.8V800c0 22.4 12.8 35.2 35.2 35.2h102.4c6.4 0 12.8-3.2 16-6.4 12.8-12.8 19.2-28.8 19.2-48v-176c0-6.4 0-6.4 6.4-6.4h201.6c16 0 28.8-12.8 32-28.8v-105.6c0-6.4-3.2-12.8-6.4-19.2-6.4-9.6-19.2-12.8-32-12.8h-201.6v-6.4-195.2c0-25.6-12.8-38.4-38.4-38.4h-96c-6.4 0-12.8 0-19.2 3.2-12.8 6.4-19.2 19.2-19.2 32v201.6H224c-22.4 0-35.2 12.8-35.2 35.2v99.2c0 9.6 3.2 16 6.4 22.4 6.4 9.6 19.2 12.8 32 12.8h198.4z" fill="#FFFFFF" p-id="4648"></path></svg> -->
-								<div>医院</div>
+								
+								<!-- <div>医院</div> -->
+								<div>{{ productInfo.hospitalType }}</div>
 							</div>
 						</div>
 						<div class="grayWords hospitalInfoAddress marginRow">
 							<van-icon name="location-o" />
-							<div>浙南云谷I幢</div>
+							<!-- <div>浙南云谷I幢</div> -->
+							<div>{{ productInfo.hospitalAddress }}</div>
 						</div>
 					</div>
 				</div>
@@ -69,7 +74,7 @@
   				详情
 			</van-divider>
 			<div style="margin-bottom: 60px;">
-				
+				<div v-html="productInfo.content" style="text-align: left;padding: 0px 20px;"></div>
 			</div>
 
 			<van-goods-action class="vanTab">
@@ -85,27 +90,35 @@
 // @ is an alias to /src
 // import HelloWorld from '@/components/HelloWorld.vue'
 
-import Vue from 'vue';
+// import Vue from 'vue';
 import store from '@/store';
 
 // // 手动引入vant单个组件
 // import Button from 'vant/lib/button';
 // import 'vant/lib/button/style';
 
-import Vant from 'vant';
-import 'vant/lib/index.css';
+// import Vant from 'vant';
+// import 'vant/lib/index.css';
 
 
-Vue.use(Vant);
+// Vue.use(Vant);
+
+import { pdetail } from '@/api/project'
 
 export default {
 	name: '',
 	store,
 	data(){
 		return{
-			productName:"【奥昵玻尿酸0.5ml】守护 年轻的秘密",
+			// productName:"【奥昵玻尿酸0.5ml】守护 年轻的秘密",
 			current: 0,
-			pics:["https://img.yzcdn.cn/vant/cat.jpeg","https://img.yzcdn.cn/vant/cat.jpeg"],//轮播图片数组
+			pics:[
+				// "https://img.yzcdn.cn/vant/cat.jpeg","https://img.yzcdn.cn/vant/cat.jpeg"
+			],//轮播图片数组
+
+			productInfo:{
+
+			},
 
 		}
 	},
@@ -122,7 +135,10 @@ export default {
 	      this.current = index;
 	    },
 	    phone(){
-	    	window.href="tel:xxxxxxxxxxx"
+	    	// console.log(this.productInfo)
+	    	// console.log(this.productInfo.hospitalPhone)
+	    	// window.href="tel:xxxxxxxxxxx"
+	    	window.location.href="tel:"+this.productInfo.hospitalPhone
 	    },
 	    collect(){},
 	    subscribe(){
@@ -137,10 +153,17 @@ export default {
 
 	},
 	created(){
-		this.product=this.$router.currentRoute.query.product
-		console.log(this.product)
+		var product=JSON.parse(this.$router.currentRoute.query.product)
 
-		console.log(this.$router)
+		var that=this;
+		pdetail({id:product.id}).then(function(response){
+			// console.log(response)
+			that.productInfo=response.result
+			that.pics=response.result.images.split(",")
+		})
+
+		// console.log(this.product)
+		// console.log(this.$router)
 	}
 
 }

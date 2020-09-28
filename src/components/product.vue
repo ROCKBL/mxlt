@@ -1,10 +1,10 @@
 <template>
   <div class="product" @click="onClick">
-      <van-image class="productPic" width="100%"  :src="productInfo.pic" />
+      <van-image class="productPic" width="100%"  :src="productInfo.firstImage" />
       <div class="productName">{{ productInfo.name }}</div>
-      <div class="productCompanyWrap" v-if="productInfo.company">
+      <div class="productCompanyWrap" v-if="productInfo.hospitalName">
         <van-image class="productCompanyPic" :src="require('../assets/imgs/196.png')" />
-        <div class="productCompany">{{ productInfo.company }}</div>
+        <div class="productCompany">{{ productInfo.hospitalName }}</div>
       </div>
       <div class="productOldPrice" v-if=" hasKey('oldPrice') ">￥{{ productInfo.oldPrice }}</div>
       <div class="productPriceWrap">
@@ -21,18 +21,18 @@
 // @ is an alias to /src
 // import HelloWorld from '@/components/HelloWorld.vue'
 
-import Vue from 'vue';
+// import Vue from 'vue';
 import store from '@/store';
 
 // // 手动引入vant单个组件
 // import Button from 'vant/lib/button';
 // import 'vant/lib/button/style';
 
-import Vant from 'vant';
-import 'vant/lib/index.css';
+// import Vant from 'vant';
+// import 'vant/lib/index.css';
 
 
-Vue.use(Vant);
+// Vue.use(Vant);
 
 export default {
   name: '',

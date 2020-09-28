@@ -13,12 +13,12 @@
 				<van-tag class="searchTag" v-for="s in historySearchList" plain round closeable size="large"  @close="closeTag(s)">{{ s }}</van-tag>
 			</div>
 		</div>
-		<div class="searchContent" v-if="hotSearchList.length>0">
+		<!-- <div class="searchContent" v-if="hotSearchList.length>0">
 			<div class="searchContentHead">热门搜索</div>
 			<div class="searchList">
 				<van-tag class="searchTag" v-for="s in hotSearchList" plain round size="large"  @close="closeTag(s)">{{ s }}</van-tag>
 			</div>
-		</div>
+		</div> -->
 	</div>
 </template>
 
@@ -33,11 +33,11 @@ import store from '@/store';
 // import Button from 'vant/lib/button';
 // import 'vant/lib/button/style';
 
-import Vant from 'vant';
-import 'vant/lib/index.css';
+// import Vant from 'vant';
+// import 'vant/lib/index.css';
 import { Dialog } from 'vant';
 
-Vue.use(Vant);
+// Vue.use(Vant);
 Vue.use(Dialog);
 
 export default {
@@ -48,6 +48,9 @@ export default {
 			searchValue:null,
 			hotSearchList:["洗护","玻璃尿水","洗护","玻璃尿水","洗护","玻璃尿水"],//服务器获取
 			historySearchList:[],//本地缓存
+
+			localStorageStr:"historySearchList",
+			type:null
 		}
 	},
 	computed:{
@@ -68,10 +71,17 @@ export default {
         	})
         	if(rtn==undefined){
         		this.historySearchList.push(this.searchValue)
-        		window.localStorage.setItem("historySearchList",JSON.stringify(this.historySearchList))
+        		window.localStorage.setItem(this.localStorageStr,JSON.stringify(this.historySearchList))
         	}
         	
         	// 跳转搜索结果页面
+        	if(this.type=="project"){
+        		this.$router.push({ 
+	                name: 'projectSearchList',
+	                query: { searchValue:this.searchValue }
+	            })
+        	}
+
         },
         onCancel(){
         	console.log("ss")
@@ -80,7 +90,7 @@ export default {
         	// 关闭历史标签
         	var index=this.historySearchList.indexOf(s)
         	this.historySearchList.splice(index, 1);
-        	window.localStorage.setItem("historySearchList",JSON.stringify(this.historySearchList))
+        	window.localStorage.setItem(this.localStorageStr,JSON.stringify(this.historySearchList))
         }
 
 	},
@@ -88,7 +98,15 @@ export default {
 
 	},
 	created(){
-		this.historySearchList=JSON.parse(window.localStorage.getItem("historySearchList"))||[]
+		var type=this.$router.currentRoute.query.type;
+		this.type=type
+		if(type=="project"){
+			this.localStorageStr="historySearchListPro"
+		}
+
+		this.historySearchList=JSON.parse(window.localStorage.getItem(this.localStorageStr))||[]
+
+		
 	}
 
 }

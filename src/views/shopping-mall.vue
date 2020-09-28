@@ -23,7 +23,7 @@
             <!-- 轮播 -->
             <van-swipe class="my-swipe" :autoplay="3000" indicator-color="#999999">
                 <van-swipe-item v-for=" pic in swipeList " :key="pic.url">
-                    <van-image width="100%"  :src="pic.pic" @click="imgClick(pic.url)" />
+                    <van-image width="100%"  :src="pic.images" @click="imgClick(pic.shopId)" />
                 </van-swipe-item>
             </van-swipe>
             
@@ -94,16 +94,18 @@
 // @ is an alias to /src
 // import HelloWorld from '@/components/HelloWorld.vue'
 import product from '@/components/product.vue'
-import Vue from 'vue'
+// import Vue from 'vue'
 import store from '@/store'
 
 // // 手动引入vant单个组件
 // import Button from 'vant/lib/button';
 // import 'vant/lib/button/style';
 
-import Vant from 'vant'
-import 'vant/lib/index.css'
-Vue.use(Vant)
+// import Vant from 'vant'
+// import 'vant/lib/index.css'
+// Vue.use(Vant)
+
+import { clist } from '@/api/carouselImage'
 
 export default {
   	name: '',
@@ -114,8 +116,8 @@ export default {
 			active: 0,
 
             swipeList:[
-                {pic:require('../assets/imgs/28.png'),url:"11"},
-                {pic:require("../assets/imgs/29.png"),url:"22"},
+                // {pic:require('../assets/imgs/28.png'),url:"11"},
+                // {pic:require("../assets/imgs/29.png"),url:"22"},
 
             ],
             swipeList1:[
@@ -189,7 +191,17 @@ export default {
         },
         imgClick(){},
         swipeTypeClick(){},
-        init(){},
+        init(){
+            // 初始化界面数据
+            var that=this;
+            // 初始化轮播图
+            clist({
+                type:false
+            }).then(function(response){
+                // console.log(response)
+                that.swipeList=response.result
+            })
+        },
         tabClickBottom(index){
             // 底部跳转
             this.$router.replace(this.bottomButtonList[index].url)
@@ -197,6 +209,7 @@ export default {
   	},
   	mounted(){
         this.time=60*60*1000;
+        this.init()
   	},
   	created(){}
 

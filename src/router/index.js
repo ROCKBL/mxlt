@@ -45,7 +45,16 @@ const routes = [
     component: () => import('../views/appointmentInfo.vue')
     // component: shoppingMall
   },
-
+  {
+    // 项目搜索页
+    path: '/projectSearchList',
+    name: 'projectSearchList',
+    component: () => import('../views/projectSearchList.vue'),
+    // meta: {
+    //   keepAlive: true, 
+    //   isBack: false
+    // }
+  },
 
   // 商城路由
   {
