@@ -2,35 +2,35 @@
     <div class="mine">
         <van-nav-bar title="我的"  class="pageNavNative" >
             <template #right>
-                <van-icon class="navLeftIcon iconfont" class-prefix='icon' name="tongzhi" size="16" color="white" />
+                <van-icon class="navLeftIcon iconfont" class-prefix='icon' name="tongzhi" size="16" color="white" @click="goNotice" />
                 <van-icon name="setting-o" size="18" @click="goUserInfo"  />
             </template>
         </van-nav-bar>
 
         <div class="headBox">
             <div class="headUserInfo" @click="goUserInfo">
-                <van-image class="headUserInfoPic" round width="50" height="50" src="https://img.yzcdn.cn/vant/cat.jpeg" />
+                <van-image class="headUserInfoPic" round width="50" height="50" :src="userInfo.avatar" />
                 <div class="headUserInfoShort" >
                     <div>
-                        {{ userName }}
-                        <van-icon v-if="gender=='男'" class="iconfont" class-prefix='icon' name='nan' color="blue" />
+                        {{ userInfo.name }}
+                        <van-icon v-if="userInfo.sex=='1'" class="iconfont" class-prefix='icon' name='nan' color="blue" />
                         <van-icon v-else class="iconfont" class-prefix='icon' name='nv' color="red" />
                     </div>
-                    <div>关注&nbsp{{ attentionNum }}&nbsp | &nbsp粉丝&nbsp{{ fansNum }}</div>
+                    <div>关注&nbsp{{ userInfo.attentionNum }}&nbsp | &nbsp粉丝&nbsp{{ userInfo.beAttentionNum }}</div>
                 </div>
                 <van-icon class="headUserInfoIcon" name="arrow" />
             </div>
             <div class="headUserAction">
-                <div>
-                    <div>{{ diaryNum }}</div>
+                <div @click="seeDiary">
+                    <div>{{ userInfo.diaryNum }}</div>
                     <div>日记</div>
                 </div>
-                <div>
-                    <div>{{ collectNum }}</div>
+                <div @click="seeCollect">
+                    <div>{{ userInfo.colltectNum }}</div>
                     <div>收藏</div>
                 </div>
                 <div>
-                    <div>{{ leftMoney }}</div>
+                    <div>{{ userInfo.money }}</div>
                     <div>余额</div>
                 </div>
             </div>
@@ -39,9 +39,10 @@
                 <div class="headUserVip">
                     <div class="headUserVipTop">
                         <div><van-icon class="iconfont " class-prefix='icon' name='vipdiamond-f' style="margin-right: 5px;" />会员中心</div>
-                        <div>点击此处区域进入会员中心<van-icon name="arrow" /></div>
+                        <div @click="seeVipCenter">点击此处区域进入会员中心<van-icon name="arrow" /></div>
                     </div>
-                    <div class="headUserVipBottom">您还不是会员哦，开通立享特权~</div>
+                    <div class="headUserVipBottom" v-if="userInfo.role=='MEMBER'">您还不是会员哦，开通立享特权~</div>
+                    <div class="headUserVipBottom" v-else>{{ getUserLevel(userInfo.role) }}</div>
                     <van-icon  class="iconfont headUserVipIcon" class-prefix='icon' name='v' color="" size="60" />
                 </div>
             </div>
@@ -50,7 +51,7 @@
         <div class="contentRow firstRow projectOrderItems">
             <div class="contentRowTitle">项目订单</div>
             <div class="contentRowItems">
-                <div class="contentRowItem" v-for="item in projectOrderList">
+                <div class="contentRowItem" v-for="item in projectOrderList" @click="seeProjectOrder(item)">
                     <van-icon class="iconfont" :class="item.class" :class-prefix="item.iconPrefix" :name="item.icon"  :size="item.size" />
                     <div>{{ item.name }}</div>
                 </div>
@@ -60,7 +61,7 @@
         <div class="contentRow">
             <div class="contentRowTitle">商城订单</div>
             <div class="contentRowItems shopOrderItems ">
-                <div class="contentRowItem" v-for="item in shopOrderList">
+                <div class="contentRowItem" v-for="item in shopOrderList" @click="seeGoodsOrder(item)">
                     <van-icon class="iconfont" :class="item.class" :class-prefix="item.iconPrefix" :name="item.icon"  :size="item.size" :badge="item.badge" />
                     <div>{{ item.name }}</div>
                 </div>
@@ -69,7 +70,7 @@
         <div class="contentRow" style="margin-bottom: 60px;">
             <div class="contentRowTitle">工具与服务</div>
             <div class="contentRowItems toolsItems">
-                <div class="contentRowItem" v-for="item in toolsList">
+                <div class="contentRowItem" v-for="item in toolsList" @click="seeTools(item)">
                     <div class="iconfontWrap">
                         <van-icon class="iconfont" :class="item.class" :class-prefix="item.iconPrefix" :name="item.icon"  :size="item.size" />
                     </div>
@@ -90,22 +91,23 @@
 // @ is an alias to /src
 // import HelloWorld from '@/components/HelloWorld.vue'
 
-import Vue from 'vue'
+// import Vue from 'vue'
 import store from '@/store'
 
 // // 手动引入vant单个组件
 // import Button from 'vant/lib/button';
 // import 'vant/lib/button/style';
 
-import Vant from 'vant'
-import 'vant/lib/index.css'
+// import Vant from 'vant'
+// import 'vant/lib/index.css'
 
 
-Vue.use(Vant)
+// Vue.use(Vant)
 
 // 阿里图标文件
 // import "@/assets/iconfont/iconfont.css";
 
+import { mapState } from 'vuex'
 
 export default {
   	name: '',
@@ -126,8 +128,8 @@ export default {
             collectNum:6,
             // trackNum:7,
             leftMoney:"10.00",
-            userName:"防晒霜",
-            gender:"男",
+            // userName:"防晒霜",
+            // gender:"男",
             isVip:false,
             projectOrderList:[
                 {name:"全部订单",iconPrefix:"icon",icon:"icon",class:"linearYellow",size:"34"},
@@ -137,33 +139,53 @@ export default {
                 {name:"已完成",iconPrefix:"icon",icon:"dingdan-yiwancheng",class:"linearPurple",size:"40"},
             ],
             shopOrderList:[
-                {name:"待付款",iconPrefix:"icon",icon:"qianbao1",size:"28",badge:"9"},
+                {name:"待付款",iconPrefix:"icon",icon:"qianbao1",size:"28",},
                 {name:"待发货",iconPrefix:"icon",icon:"daifahuo",size:"28"},
                 {name:"待收货",iconPrefix:"icon",icon:"daishouhuo",size:"26"},
-                {name:"待评价",iconPrefix:"icon",icon:"ziyuan",size:"24"},
+                {name:"已完成",iconPrefix:"icon",icon:"ziyuan",size:"24"},
                 {name:"全部订单",iconPrefix:"icon",icon:"dingdan",size:"24"},
             ],
             toolsList:[
-                {name:"购物车",iconPrefix:"icon",icon:"gouwuche",size:"20"},
-                {name:"收货地址",iconPrefix:"icon",icon:"dizhi",size:"28"},
-                {name:"优惠券",iconPrefix:"icon",icon:"youhuiquan",size:"28"},
-                {name:"钱包明细",iconPrefix:"icon",icon:"jifenmingxi",size:"22"},
+                {name:"购物车",iconPrefix:"icon",icon:"gouwuche",size:"20",route:"/cart"},
+                {name:"收货地址",iconPrefix:"icon",icon:"dizhi",size:"28",route:"/address"},
+                {name:"优惠券",iconPrefix:"icon",icon:"youhuiquan",size:"28",route:"/myCoupons"},
+                {name:"钱包明细",iconPrefix:"icon",icon:"jifenmingxi",size:"22",route:"/myWallet"},
                 // {name:"钱包",iconPrefix:"icon",icon:"qianbao",size:"28"},
-                {name:"绑定卡号",iconPrefix:"icon",icon:"buoumaotubiao26",size:"22"},
-                {name:"我的推广",iconPrefix:"icon",icon:"erweima",size:"26"},
-                {name:"我的团队",iconPrefix:"icon",icon:"tuandui",size:"24"},
+                {name:"绑定卡号",iconPrefix:"icon",icon:"buoumaotubiao26",size:"22",route:"/bankCard"},
+                {name:"我的推广",iconPrefix:"icon",icon:"erweima",size:"26",route:"/popularize"},
+                {name:"我的团队",iconPrefix:"icon",icon:"tuandui",size:"24",route:"/myTeam"},
                 
             ]
 		}
   	},
   	computed:{
-
+        ...mapState({
+            userInfo(state){ return state.userInfo},
+        })
   	},
   	watch:{},
   	components: {
 
   	},
   	methods:{
+
+        getUserLevel(s){
+            if(s=="MEMBER"){
+                return "普通会员"
+            }
+            if(s=="VIP_MEMBER"){
+                return "白金会员"
+            }
+            if(s=="VIP_MAJORDOMO"){
+                return "VIP 总监"
+            }
+            if(s=="DIAMOND_MEMBER"){
+                return "钻石会员"
+            }
+            if(s=="BOARD_MEMBER"){
+                return "董事会员"
+            }
+        },
 
         tabClickBottom(index){
             // 底部跳转
@@ -174,6 +196,36 @@ export default {
         goUserInfo(){
             this.$router.push("/myinfo");
         },
+        goNotice(){
+            this.$router.push("/notice");
+        },
+        seeDiary(){
+            this.$router.push("/myDiary");
+        },
+        seeCollect(){
+            this.$router.push("/myCollect");
+        },
+        seeVipCenter(){
+            this.$router.push("/vipCenter");
+        },
+        seeProjectOrder(item){
+            // this.$router.push("/myOrder");
+            this.$router.push({
+                name: 'myOrder',
+                query: { name:item.name }
+            });
+        },
+        seeGoodsOrder(item){
+            // this.$router.push("/orderList");
+            this.$router.push({
+                name: 'orderList',
+                query: { name:item.name }
+            });
+        },
+        seeTools(item){
+            this.$router.push(item.route)
+        },
+
         init(){
             // 初始化界面数据
         },
@@ -185,7 +237,9 @@ export default {
   	},
   	created(){
         // 初始化数据
+        store.dispatch("getUserInfo").then(function(){
 
+        })
     }
 
 }
@@ -318,6 +372,7 @@ export default {
         bottom: 20px;
         right: 20px;
         color: rgba(0,0,0,0.25);
+        pointer-events: none;
     }
 
     .mine .headUserVipWrap{

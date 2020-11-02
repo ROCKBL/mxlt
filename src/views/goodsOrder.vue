@@ -3,13 +3,13 @@
 		<van-nav-bar title="确认订单"  left-arrow class="pageNavNative" @click-left="onClickLeft" />
 		
 		<div class="orderAddress" @click="changeAddress">
-			<van-image class="orderAddressImg" round src="https://img.yzcdn.cn/vant/cat.jpeg" />
+			<van-image class="orderAddressImg" round :src="locationUrl" />
 			<div class="orderAddressContent">
 				<div class="orderAddressContentUp">
 					<div>{{ address.name }}</div>
 					<div class="orderAddressContentUpPhone">{{ address.phone }}</div>
 				</div>
-				<div class="orderAddressContentDown">{{ address.address }}</div>
+				<div class="orderAddressContentDown">{{ address.province }}-{{ address.city }}-{{ address.area }}{{ address.address }}</div>
 			</div>
 			<van-icon class="orderAddressIcon" name="arrow" />
 		</div>
@@ -57,12 +57,14 @@ import store from '@/store';
 // import Button from 'vant/lib/button';
 // import 'vant/lib/button/style';
 
-import Vant from 'vant';
-import 'vant/lib/index.css';
+// import Vant from 'vant';
+// import 'vant/lib/index.css';
 import { Dialog } from 'vant';
 
-Vue.use(Vant);
+// Vue.use(Vant);
 Vue.use(Dialog);
+
+import { agetDefalut } from '@/api/address'
 
 export default {
 	name: '',
@@ -70,13 +72,15 @@ export default {
 	data(){
 		return{
 			address:{
-				name:"陈某某",
-				phone:"13858718329",
-				address:"浙江省-温州市-龙湾区浙南云谷X幢"
+				// name:"陈某某",
+				// phone:"13858718329",
+				// address:"浙江省-温州市-龙湾区浙南云谷X幢"
 			},
 			useLeftMoney:false,
 
-			goodsNum:1
+			goodsNum:1,
+
+			locationUrl:require('../assets/imgs/location.png')
 		}
 	},
 	computed:{
@@ -117,12 +121,21 @@ export default {
         		return
         	}
         },
+        getAddress(){
+        	var that=this;
+        	agetDefalut().then(function(response){
+        		// console.log(response)
+        		that.address=response.result
+        	})
+        }
 
 	},
 	mounted(){
 
 	},
-	created(){}
+	created(){
+		this.getAddress()
+	}
 
 }
 </script>

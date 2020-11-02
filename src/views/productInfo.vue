@@ -5,7 +5,7 @@
 		<div>
 			<van-swipe @change="onChange" class="productInfoSwipe">
 			  	<van-swipe-item v-for="pic in pics">
-			  		<van-image width="100%"  :src="pic" />
+			  		<van-image width="100%" fit="contain" height="200px" :src="pic" />
 			  	</van-swipe-item>
 			  	
 			  	<template #indicator>
@@ -26,9 +26,9 @@
 					<div class="grayWords marginRow">优惠价￥{{ Number(productInfo.couponPrice).toFixed(2) }}</div>
 					<div class="productName marginRow">{{ productInfo.name }}</div>
 				</div>
-				<div class="productInfoContent_row_one_right">
-					<div><svg t="1597644778339" class="icon" viewBox="0 0 1051 1024" version="1.1" xmlns="http://www.w3.org/2000/svg" p-id="2892" width="32" height="32"><path d="M848.392 73.998 848.393 74c-75.553 0-136.8 61.915-136.8 138.254 0 8.07 0.728 15.974 2.068 23.661L308.055 405.784c-24.957-33.531-64.561-55.276-109.254-55.276-75.531 0-136.8 61.915-136.8 138.346 0 76.615 61.269 138.508 136.8 138.508 36.985 0 70.479-14.936 95.087-39.077l259.346 188.804c-7.955 17.545-12.433 37.059-12.433 57.642 0 76.385 61.015 138.277 136.546 138.277s136.8-61.915 136.8-138.277c0-76.338-61.269-138.231-136.8-138.231-33.584 0-64.276 12.326-88.017 32.651L326.754 537.996c5.707-15.259 8.846-31.814 8.846-49.119 0-9.735-1.067-19.194-2.988-28.328l403.774-169.102c24.721 35.677 65.587 59.082 111.983 59.082 75.553 0 136.8-61.915 136.8-138.277C985.191 135.913 923.947 73.998 848.392 73.998zM198.822 565.97c-42.466 0-77-34.471-77-77.068 0-42.443 34.534-76.932 77-76.932s77 34.471 77 76.932C275.822 531.465 241.288 565.97 198.822 565.97zM677.379 757.788c42.485 0 77.035 34.529 77.035 76.992 0 42.463-34.549 77.008-77.035 77.008s-76.965-34.546-76.965-77.008C600.414 792.317 634.912 757.788 677.379 757.788zM848.393 289.289c-42.466 0-77-34.546-77-77.008 0-42.462 34.534-76.992 77-76.992 42.466 0 77 34.529 77 76.992C925.393 254.744 890.859 289.289 848.393 289.289z" p-id="2893" fill="#FF8C34"></path></svg></div>
-					<div>分享</div>
+				<div class="productInfoContent_row_one_right" @click="share">
+					<!-- <div><svg t="1597644778339" class="icon" viewBox="0 0 1051 1024" version="1.1" xmlns="http://www.w3.org/2000/svg" p-id="2892" width="32" height="32"><path d="M848.392 73.998 848.393 74c-75.553 0-136.8 61.915-136.8 138.254 0 8.07 0.728 15.974 2.068 23.661L308.055 405.784c-24.957-33.531-64.561-55.276-109.254-55.276-75.531 0-136.8 61.915-136.8 138.346 0 76.615 61.269 138.508 136.8 138.508 36.985 0 70.479-14.936 95.087-39.077l259.346 188.804c-7.955 17.545-12.433 37.059-12.433 57.642 0 76.385 61.015 138.277 136.546 138.277s136.8-61.915 136.8-138.277c0-76.338-61.269-138.231-136.8-138.231-33.584 0-64.276 12.326-88.017 32.651L326.754 537.996c5.707-15.259 8.846-31.814 8.846-49.119 0-9.735-1.067-19.194-2.988-28.328l403.774-169.102c24.721 35.677 65.587 59.082 111.983 59.082 75.553 0 136.8-61.915 136.8-138.277C985.191 135.913 923.947 73.998 848.392 73.998zM198.822 565.97c-42.466 0-77-34.471-77-77.068 0-42.443 34.534-76.932 77-76.932s77 34.471 77 76.932C275.822 531.465 241.288 565.97 198.822 565.97zM677.379 757.788c42.485 0 77.035 34.529 77.035 76.992 0 42.463-34.549 77.008-77.035 77.008s-76.965-34.546-76.965-77.008C600.414 792.317 634.912 757.788 677.379 757.788zM848.393 289.289c-42.466 0-77-34.546-77-77.008 0-42.462 34.534-76.992 77-76.992 42.466 0 77 34.529 77 76.992C925.393 254.744 890.859 289.289 848.393 289.289z" p-id="2893" fill="#FF8C34"></path></svg></div>
+					<div>分享</div> -->
 				</div>
 			</div>
 			<div class="productInfoContent_row grayWords marginRow">
@@ -43,7 +43,7 @@
 
 			<div class="productInfoContent_row marginRow productInfoContent_row_three">
 				<div class="productInfoContent_row_three_left">
-					<van-image round width="48px" height="48px" :src="productInfo.hospitalImages"/>
+					<van-image round width="48px" height="48px" :src="productInfo.hospitalLogo"/>
 					<div class="hospitalInfo">
 						<div class="hospitalInfoName">{{ productInfo.hospitalName }}</div>
 						<div class="hospitalInfoRate marginRow">
@@ -64,7 +64,7 @@
 						</div>
 					</div>
 				</div>
-				<div class="productInfoContent_row_three_right">
+				<div class="productInfoContent_row_three_right" @click="location">
 					<svg t="1597651200579" class="icon" viewBox="0 0 1024 1024" version="1.1" xmlns="http://www.w3.org/2000/svg" p-id="5888" width="32" height="32"><path d="M559.446001 974.871069c-1.332399 0-2.662752-0.084934-4.021758-0.282433-12.770361-1.784646-22.823733-11.835559-24.608452-24.635073l-56.265727-401.479861L73.720976 492.111021c-12.800038-1.783623-22.823733-11.836583-24.607429-24.635073-1.81235-12.798491 5.096274-25.200962 16.877057-30.453592l866.448392-385.352555c10.931405-4.799306 23.702789-2.478448 32.168948 5.988388 8.468206 8.452509 10.817813 21.252023 5.976353 32.209586L585.837126 957.681572C581.135864 968.230835 570.744788 974.871069 559.446001 974.871069zM181.693413 448.857914 504.142221 494.205729c12.799015 1.784646 22.823733 11.836583 24.607429 24.635073l45.279061 322.945203L887.357441 135.045719 181.693413 448.857914z" p-id="5889" fill="#FF8C34"></path></svg>
 					<div>导航</div>
 				</div>
@@ -79,7 +79,9 @@
 
 			<van-goods-action class="vanTab">
 			  	<van-goods-action-icon icon="phone-o" text="电话" @click="phone" />
-			  	<van-goods-action-icon icon="like-o" text="收藏" @click="collect" />
+			  	<van-goods-action-icon icon="like" class="collecedtIcon" v-if="productInfo.isCollect" text="收藏" @click="collect" />
+			  	<van-goods-action-icon icon="like-o" v-else  text="收藏" @click="collect" />
+			  	
 			  	<van-goods-action-button type="danger" text="立即预约" @click="subscribe" color="#FF8C34" />
 			</van-goods-action>
 		</div>
@@ -105,6 +107,10 @@ import store from '@/store';
 
 import { pdetail } from '@/api/project'
 
+import { pclcollectionAndCancel } from '@/api/collect'
+
+import { mapState } from 'vuex'
+
 export default {
 	name: '',
 	store,
@@ -119,10 +125,15 @@ export default {
 			productInfo:{
 
 			},
+			productId:null,
 
 		}
 	},
-	computed:{},
+	computed:{
+		...mapState({
+            userInfo(state){ return state.userInfo},
+        })
+	},
 	watch:{},
 	components: {
 		// HelloWorld
@@ -134,34 +145,148 @@ export default {
 		onChange(index) {
 	      this.current = index;
 	    },
+
+	    share(){
+	    	// 分享
+	    	console.log("分享")
+	    	var that=this;
+	    	wx.updateAppMessageShareData({ 
+			    title: '分享标题', // 分享标题
+			    desc: '分享描述', // 分享描述
+			    link: window.location.href, // 分享链接，该链接域名或路径必须与当前页面对应的公众号JS安全域名一致
+			    imgUrl: '', // 分享图标
+			    success:function () {
+			      // 设置成功
+			      
+			    },
+			    fail:function(e){
+			    	console.log(e)
+			    	alert(e)
+			    	try{
+			    		alert(JSON.stringify(e))
+			    	}catch(x){
+
+			    	}
+			    }
+			})
+
+			wx.updateTimelineShareData({ 
+			    title: '分享标题', // 分享标题
+			    link: window.location.href, // 分享链接，该链接域名或路径必须与当前页面对应的公众号JS安全域名一致
+			    imgUrl: '', // 分享图标
+			    success: function () {
+			      // 设置成功
+			    }
+			})
+
+	    },
+	    location(){
+	    	// 导航
+	    	
+	    	console.log("导航")
+
+	    	wx.openLocation({
+			  latitude: this.productInfo.latitude, // 纬度，浮点数，范围为90 ~ -90
+			  longitude: this.productInfo.longitude, // 经度，浮点数，范围为180 ~ -180。
+			  name: this.productInfo.hospitalName, // 位置名
+			  address: this.productInfo.hospitalAddress, // 地址详情说明
+			  scale: 11, // 地图缩放级别,整形值,范围从1~28。默认为最大
+			  infoUrl: '', // 在查看位置界面底部显示的超链接,可点击跳转
+			  fail:function(e){
+			    	console.log(e)
+			    	// alert(e)
+			    	try{
+			    		// alert(JSON.stringify(e))
+			    	}catch(x){
+			    		
+			    	}
+			    }
+			});
+	    },
+
 	    phone(){
 	    	// console.log(this.productInfo)
 	    	// console.log(this.productInfo.hospitalPhone)
 	    	// window.href="tel:xxxxxxxxxxx"
 	    	window.location.href="tel:"+this.productInfo.hospitalPhone
 	    },
-	    collect(){},
+	    collect(){
+	    	console.log(this.productInfo)
+	    	var that=this;
+	    	pclcollectionAndCancel({
+	    		projectId:this.productInfo.id
+	    	}).then(function(res){
+	    		// console.log(res)
+	    		that.getData()
+	    	})
+
+	    },
 	    subscribe(){
+	    	console.log(this.userInfo.role)
+	    	console.log(this.productInfo.type)
+	    	var userLevelNum=1
+	    	switch(this.userInfo.role){
+	    		case "MEMBER":
+	    			userLevelNum=1
+	    			break;
+	    		case "VIP_MEMBER":
+	    			userLevelNum=2
+	    			break;
+	    		case "VIP_MAJORDOMO":
+	    			userLevelNum=2
+	    			break;
+	    		case "DIAMOND_MEMBER":
+	    			userLevelNum=3
+	    			break;
+	    		case "BOARD_MEMBER":
+	    			userLevelNum=3
+	    			break;
+	    	}
+	    	var typeName="普通"
+	    	switch(this.productInfo.type){
+	    		case 0:
+	    			typeName="普通"
+	    			break;
+	    		case 1:
+	    			typeName="特价"
+	    			break;
+	    		case 2:
+	    			typeName="VIP"
+	    			break;
+	    		case 3:
+	    			typeName="钻石"
+	    			break;
+	    	}
+
+	    	if(this.productInfo.type>userLevelNum){
+	    		this.Toast("当前用户会员等级不够不能预约，需要"+typeName)
+	    		return
+	    	}
 	    	// 跳转预约支付页面
 	    	this.$router.push({
 	    		name: 'order',
-                query: { product:this.product, }
+                // query: { product:this.product, }
+                query: { product:JSON.stringify(this.productInfo), }
 	    	})
+	    },
+	    getData(){
+	    	var that=this;
+			pdetail({id:this.productId}).then(function(response){
+				console.log(response)
+				that.productInfo=response.result
+				that.pics=response.result.images.split(",")
+			})
 	    }
 	},
 	mounted(){
 
 	},
 	created(){
+		this.share()
+
 		var product=JSON.parse(this.$router.currentRoute.query.product)
-
-		var that=this;
-		pdetail({id:product.id}).then(function(response){
-			// console.log(response)
-			that.productInfo=response.result
-			that.pics=response.result.images.split(",")
-		})
-
+		this.productId=product.id
+		this.getData()
 		// console.log(this.product)
 		// console.log(this.$router)
 	}
@@ -320,5 +445,9 @@ export default {
 		border-radius: 15px;
 		color: white;
 		padding: 2px 15px;
+	}
+
+	.collecedtIcon .van-goods-action-icon__icon{
+		color: #FF8C34
 	}
 </style>

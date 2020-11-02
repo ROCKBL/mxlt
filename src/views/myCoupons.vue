@@ -11,13 +11,13 @@
 
             <div class="base-coupons" v-for="c in showCoupons">
                 <div class="couponLeft">
-                    <div class="couponLeftTop"><span class="couponLeftTopUnit">￥</span>{{ c.fee }}</div>
-                    <div class="couponLeftBottom">满{{ c.minfee }}可用</div>
+                    <div class="couponLeftTop"><span class="couponLeftTopUnit">￥</span>{{ c.money }}</div>
+                    <div class="couponLeftBottom">满{{ c.moneyQuota }}可用</div>
                 </div>
                 <div class="couponRight">
-                    <div class="couponRightTop">{{ c.name }}</div>
+                    <div class="couponRightTop">{{ c.description }}</div>
                     <div class="couponRightBottom">
-                        <div class="couponRightBottomEnd"><span>有效期至</span>{{ c.date }}</div>
+                        <div class="couponRightBottomEnd"><span>有效期至</span>{{ new Date(c.expirationTime).Format("yyyy-MM-dd hh:mm:ss") }}</div>
                         <div :class="couponStatusClass(c.status)" class="couponStatus">{{ couponStatus(c.status) }}</div>
                     </div>
                 </div>
@@ -38,10 +38,14 @@ import store from '@/store';
 // import Button from 'vant/lib/button';
 // import 'vant/lib/button/style';
 
-import Vant from 'vant';
-import 'vant/lib/index.css';
+// import Vant from 'vant';
+// import 'vant/lib/index.css';
 
-Vue.use(Vant);
+// Vue.use(Vant);
+
+import { cmyPage } from '@/api/coupons'
+
+import { mapState } from 'vuex'
 
 export default {
 	name: '',
@@ -49,15 +53,15 @@ export default {
 	data(){
 		return{
 			showCoupons:[],//展示的优惠券
-            unuseCoupons:[
-                { status:"1",date:"2020-05-26 23：59",name:"<限时>  20元新人超大红包",minfee:"50",fee:"20" }
-            ],//未使用优惠券
-            usedCoupons:[
-                { status:"2",date:"2020-05-26 23：59",name:"<限时>  20元新人超大红包",minfee:"50",fee:"20" }
-            ],//已使用优惠券
-            invalidationCoupons:[
-                { status:"3",date:"2020-05-26 23：59",name:"<限时>  20元新人超大红包",minfee:"50",fee:"20" }
-            ],//失效优惠券
+            // unuseCoupons:[
+            //     { status:"1",date:"2020-05-26 23：59",name:"<限时>  20元新人超大红包",minfee:"50",fee:"20" }
+            // ],//未使用优惠券
+            // usedCoupons:[
+            //     { status:"2",date:"2020-05-26 23：59",name:"<限时>  20元新人超大红包",minfee:"50",fee:"20" }
+            // ],//已使用优惠券
+            // invalidationCoupons:[
+            //     { status:"3",date:"2020-05-26 23：59",name:"<限时>  20元新人超大红包",minfee:"50",fee:"20" }
+            // ],//失效优惠券
 
             active:0,
 
@@ -68,7 +72,9 @@ export default {
 		}
 	},
 	computed:{
-		
+		...mapState({
+            userInfo(state){ return state.userInfo},
+        })
 	},
 	watch:{},
 	components: {
@@ -80,14 +86,14 @@ export default {
         },
         couponStatus(status){
             var type="";
-            switch(status){
-                case "1":
+            switch(this.active){
+                case 0:
                     type="未使用"
                     break;
-                case "2":
+                case 1:
                     type="已使用"
                     break;
-                case "3":
+                case 2:
                     type="已失效"
                     break;
             }
@@ -95,33 +101,67 @@ export default {
         },
         couponStatusClass(status){
             var type="";
-            switch(status){
-                case "1":
+            switch(this.active){
+                case 0:
                     type="unuseClass"
                     break;
-                case "2":
+                case 1:
                     type="usedClass"
                     break;
-                case "3":
+                case 2:
                     type="invalidationClass"
                     break;
             }
             return type;
         },
         tabChange(index){
-            var attr=this.listAr[index]
-            this.showCoupons=[].concat(this[attr])
+            // var attr=this.listAr[index]
+            // this.showCoupons=[].concat(this[attr])
             // this.activeStatusClass=this.couponStatusClass(this.showCoupons[0].status)
+            this.getData()
         },
         init(){
-            this.showCoupons=[].concat(this.unuseCoupons)
+            // this.showCoupons=[].concat(this.unuseCoupons)
         },
+        getData(){
+            var that=this
+            var state="NOT_USE"
+            switch(this.active){
+                case 0:
+                    state="NOT_USE"
+                    break;
+                case 1:
+                    state="ALREADIES_USE"
+                    break;
+                case 2:
+                    state="ALREADIES_EXPIRATION"
+                    break;
+            }
+
+            that.showCoupons.length=0
+            cmyPage({
+                start:1,
+                limit:999,
+                consumerId:this.userInfo.id,
+                state:state
+            }).then(function(response){
+                console.log(response)
+                that.showCoupons=response.result.items
+            })
+        }
+
 	},
 	mounted(){
 
 	},
 	created(){
         this.init();
+
+        var that=this;
+        store.state.userPromiseFlag.then(function(){
+            that.getData()
+        })
+        
     }
 
 }

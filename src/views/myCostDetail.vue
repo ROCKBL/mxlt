@@ -11,18 +11,23 @@
 			
 			<div v-for="cost in costList" class="costRow">
 				<div class="costIcon">
-					<van-icon v-if="cost.type==='1'" class="iconfont bgIcon" class-prefix='icon' :name="typeIcon(cost.type)" size="24" color="white"  />
-					<van-icon v-if="cost.type==='2'" class="iconfont bgIcon" class-prefix='icon' :name="typeIcon(cost.type)" size="24" color="white"  />
-					<van-icon v-if="cost.type==='3'" class="iconfont" class-prefix='icon' :name="typeIcon(cost.type)" size="38" color="rgba(255,140,52,1)"  />
+					<!-- <van-icon v-if="cost.type===1" class="iconfont bgIcon" class-prefix='icon' :name="typeIcon(cost.type)" size="24" color="white"  /> -->
+					<!-- <van-icon v-if="cost.type===2" class="iconfont bgIcon" class-prefix='icon' :name="typeIcon(cost.type)" size="24" color="white"  /> -->
+					<!-- <van-icon v-if="cost.type===3" class="iconfont" class-prefix='icon' :name="typeIcon(cost.type)" size="38" color="rgba(255,140,52,1)"  /> -->
+                    <van-icon  class="iconfont" class-prefix='icon' name="jindutiaoqiandai" size="38" color="rgba(255,140,52,1)"  />
 				</div>
 				
 
 				<div class="costMid">
-					<div class="costName">{{ cost.name }}</div>
-					<div class="costDate">{{ cost.date }}</div>
+					<div class="costName">{{ cost.title }}</div>
+					<div class="costDate">{{ cost.createTime }}</div>
 				</div>
-				<div class="costMoney">{{ cost.money }}</div>
+				<div class="costMoney">{{ cost.signSymbol }}{{ cost.money }}元</div>
 			</div>
+
+
+            <van-empty v-if="costList.length==0" description="无相关记录" />
+
 		</div>
 
 		<!-- 年月选择器 -->
@@ -37,18 +42,21 @@
 // @ is an alias to /src
 // import HelloWorld from '@/components/HelloWorld.vue'
 
-import Vue from 'vue';
+// import Vue from 'vue';
 import store from '@/store';
 
 // // 手动引入vant单个组件
 // import Button from 'vant/lib/button';
 // import 'vant/lib/button/style';
 
-import Vant from 'vant';
-import 'vant/lib/index.css';
+// import Vant from 'vant';
+// import 'vant/lib/index.css';
 
 
-Vue.use(Vant);
+// Vue.use(Vant);
+
+import { mapState } from 'vuex'
+import { bpage } from '@/api/bill'
 
 export default {
 	name: '',
@@ -57,9 +65,9 @@ export default {
 		return{
 			date:"",
 			costList:[
-				{type:"1",date:"2020-8-22 08:44",name:"项目名称项目名称项目名称",money:"-20.00"},
-				{type:"2",date:"2020-8-22 08:44",name:"化妆品名字",money:"-20.00"},
-				{type:"3",date:"2020-8-22 08:44",name:"我的钱包提现",money:"-20.00"},
+				// {type:"1",date:"2020-8-22 08:44",name:"项目名称项目名称项目名称",money:"-20.00"},
+				// {type:"2",date:"2020-8-22 08:44",name:"化妆品名字",money:"-20.00"},
+				// {type:"3",date:"2020-8-22 08:44",name:"我的钱包提现",money:"-20.00"},
 			],
 
 
@@ -69,7 +77,11 @@ export default {
 	      	pop:false
 		}
 	},
-	computed:{},
+	computed:{
+        ...mapState({
+            userInfo(state){ return state.userInfo},
+        })
+    },
 	watch:{},
 	components: {
 		// HelloWorld
@@ -81,13 +93,13 @@ export default {
         typeIcon(type){
         	var iconName=""
         	switch(type){
-        		case "1":
+        		case 1:
         			iconName="icon1";
         			break;
-        		case "2":
+        		case 2:
         			iconName="meizhuang";
         			break;
-        		case "3":
+        		case 3:
         			iconName="jindutiaoqiandai";
         			break;
         	}
@@ -101,6 +113,7 @@ export default {
 			this.pop=false;
 			// console.log(value);
 			this.date=value.Format('yyyy-MM');
+            this.getData()
 
 		},
 		popCancel(){
@@ -121,13 +134,35 @@ export default {
 	    init(){
 	    	this.date=(new Date()).Format("yyyy-MM")
 	    },
+        getData(){
+            var that=this;
+            var date=new Date(this.date)
+            var data={
+                consumerId:this.userInfo.id,
+                start:1,
+                limit:10,
+                year:date.getFullYear(),
+                month:date.getMonth()+1
+            }
+
+            return bpage(data).then(function(response){
+                // that.total=response.result.total
+                // that.logs=that.logs.concat(response.result.items)
+                that.costList=response.result.items
+            })
+        }
 
 	},
 	mounted(){
 
 	},
 	created(){
+        var that=this;
 		this.init()
+        store.state.userPromiseFlag.then(function(){
+            that.getData()
+        })
+        
 	}
 
 }

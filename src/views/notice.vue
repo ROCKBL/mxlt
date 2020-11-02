@@ -1,14 +1,17 @@
 <template>
     <div class="notice">
-        <van-nav-bar title="我的" left-arrow @click-left="onClickLeft" class="pageNavNative" >
+        <!-- <van-nav-bar title="我的" left-arrow @click-left="onClickLeft" class="pageNavNative" >
             <template #title>
                 <div class="selfTabs">
                     <div class="selfTab leftTab" :class="activeTab==0?'tabActive':''" @click="selfTabClick(0)">消息</div>
                     <div class="selfTab rightTab" :class="activeTab==1?'tabActive':''" @click="selfTabClick(1)">通知</div>
                 </div>
             </template>
-        </van-nav-bar>
-        <div v-show="showPart=='messages'">
+        </van-nav-bar> -->
+
+        <van-nav-bar title="消息"  left-arrow class="pageNavNative" @click-left="onClickLeft" />
+
+        <!-- <div v-show="showPart=='messages'">
             <van-swipe-cell v-for="m in messages" >
                 <div class="item">
                     <van-image round class="itemAvatar" :src="m.avatar" />
@@ -25,8 +28,8 @@
                     <van-button square text="删除" type="danger" class="delete-button" />
                 </template>
             </van-swipe-cell>
-        </div>
-        <div v-show="showPart=='notices'">
+        </div> -->
+       <!--  <div v-show="showPart=='notices'">
             <van-swipe-cell v-for="m in notices" >
                 <div class="item">
                     <van-image round class="itemAvatar" :src="m.avatar" />
@@ -43,7 +46,26 @@
                     <van-button square text="删除" type="danger" class="delete-button" />
                 </template>
             </van-swipe-cell>
-        </div>
+        </div> -->
+
+        <van-list class="" v-model="loading" :finished="finished" finished-text="没有更多了" @load="onLoad">
+            <van-swipe-cell v-for="m in messages" >
+                <div class="item">
+                    <van-image round class="itemAvatar" :src="m.consumerImage" />
+                    <div class="" style="flex-grow: 1;">
+                        <div class="itemShortWrap">
+                            <div class="itemName">{{ m.consumerName }}</div>
+                            <div class="itemDate">{{ new Date(m.createTime).Format("yyyy-MM-dd hh:mm:ss") }}</div>
+                        </div>
+                        <div class="itemMessage">{{ m.content }}</div>
+                    </div>
+                </div>
+                
+                <template #right>
+                    <van-button square text="删除" type="danger" class="delete-button" @click="deletemsg(m)" />
+                </template>
+            </van-swipe-cell>
+        </van-list>
     </div>
 </template>
 
@@ -51,42 +73,51 @@
 // @ is an alias to /src
 // import HelloWorld from '@/components/HelloWorld.vue'
 
-import Vue from 'vue'
+// import Vue from 'vue'
 import store from '@/store'
 
 // // 手动引入vant单个组件
 // import Button from 'vant/lib/button';
 // import 'vant/lib/button/style';
 
-import Vant from 'vant'
-import 'vant/lib/index.css'
+// import Vant from 'vant'
+// import 'vant/lib/index.css'
 
 
-Vue.use(Vant)
+// Vue.use(Vant)
 
 // 阿里图标文件
 // import "@/assets/iconfont/iconfont.css";
 
+import { mdelete,mpage,mreadNo } from '@/api/message'
+import { mapState } from 'vuex'
 
 export default {
   	name: '',
   	store,
   	data(){
 		return{
-            activeTab:0,
+            // activeTab:0,
             messages:[
-                {id:0,name:"大撒",avatar:"https://img.yzcdn.cn/vant/cat.jpeg",words:"评论了你的日记",date:"2020-8-7"},
-                {id:1,name:"发射点",avatar:"https://img.yzcdn.cn/vant/cat.jpeg",words:"赞了你的日记",date:"2020-8-7"},
+                // {id:0,name:"大撒",avatar:"https://img.yzcdn.cn/vant/cat.jpeg",words:"评论了你的日记",date:"2020-8-7"},
+                // {id:1,name:"发射点",avatar:"https://img.yzcdn.cn/vant/cat.jpeg",words:"赞了你的日记",date:"2020-8-7"},
             ],
-            notices:[
-                {id:0,name:"大撒",avatar:"https://img.yzcdn.cn/vant/cat.jpeg",words:"评论了你的日记a",date:"2020-8-7"},
-                {id:1,name:"发射点",avatar:"https://img.yzcdn.cn/vant/cat.jpeg",words:"赞了你的日记b",date:"2020-8-7"},
-            ],
-            showPart:"messages"
+            // notices:[
+            //     {id:0,name:"大撒",avatar:"https://img.yzcdn.cn/vant/cat.jpeg",words:"评论了你的日记a",date:"2020-8-7"},
+            //     {id:1,name:"发射点",avatar:"https://img.yzcdn.cn/vant/cat.jpeg",words:"赞了你的日记b",date:"2020-8-7"},
+            // ],
+            // showPart:"messages"
+
+            loading:true,
+            finished:false,
+            pageNum:1,
+            total:0,
 		}
   	},
   	computed:{
-
+        ...mapState({
+            userInfo(state){ return state.userInfo},
+        }),
   	},
   	watch:{},
   	components: {
@@ -96,17 +127,63 @@ export default {
         onClickLeft(){
             this.$router.go(-1)
         },
-        selfTabClick(index){
-            this.activeTab=index;
-            if(index==0){
-                this.showPart="messages"
-            }else{
-                this.showPart="notices"
+        deletemsg(m){
+            var that=this;
+            console.log(m)
+            mdelete({
+                ids:m.id
+            }).then(function(res){
+                console.log(res)
+                that.refreshPage()
+            })
+        },
+        // selfTabClick(index){
+        //     this.activeTab=index;
+        //     if(index==0){
+        //         this.showPart="messages"
+        //     }else{
+        //         this.showPart="notices"
+        //     }
+        // },
+        getData(pageNum){
+            var that=this;
+            var data={
+                limit:10,
+                start:pageNum||1,
+                consumerId:this.userInfo.id
             }
+            return mpage(data).then(function(response){
+                // console.log(response)
+                that.total=response.result.total
+                that.messages=that.messages.concat(response.result.items)
+            })
         },
-        init(){
-            // 初始化界面数据
+        onLoad(){
+            // 列表下拉加载
+
+            var that=this;
+            this.pageNum+=1;
+            this.getData(this.pageNum).then(function(){
+                that.loading=false
+                if(that.messages.length==that.total){
+                    that.finished=true
+                    return
+                }
+            });
         },
+        refreshPage(){
+            var that=this;
+            this.pageNum=1;
+            this.messages.length=0
+            that.getData().then(function(){
+                that.loading=false
+                if(that.messages.length==that.total){
+                    that.finished=true
+                    return
+                }
+            })
+        }
+
 
   	},
   	mounted(){
@@ -115,7 +192,11 @@ export default {
   	},
   	created(){
         // 初始化数据
+        var that=this
+        store.state.userPromiseFlag.then(function(){
+            that.refreshPage()
 
+        })
     }
 
 }

@@ -10,7 +10,7 @@
 				<div></div>
 			</div>
 			<div class="searchList">
-				<van-tag class="searchTag" v-for="s in historySearchList" plain round closeable size="large"  @close="closeTag(s)">{{ s }}</van-tag>
+				<van-tag class="searchTag" v-for="s in historySearchList" plain round closeable size="large" @click="searchTheOne(s)"  @close="closeTag(s)">{{ s }}</van-tag>
 			</div>
 		</div>
 		<!-- <div class="searchContent" v-if="hotSearchList.length>0">
@@ -45,7 +45,7 @@ export default {
 	store,
 	data(){
 		return{
-			searchValue:null,
+			searchValue:"",
 			hotSearchList:["洗护","玻璃尿水","洗护","玻璃尿水","洗护","玻璃尿水"],//服务器获取
 			historySearchList:[],//本地缓存
 
@@ -66,6 +66,11 @@ export default {
         },
         onSearch(){
         	var that=this;
+        	if(this.searchValue==""){
+        		this.Toast("请输入搜索内容")
+        		return
+        	}
+
         	var rtn=this.historySearchList.find(function(s){
         		return s==that.searchValue
         	})
@@ -82,9 +87,19 @@ export default {
 	            })
         	}
 
+        	if(this.type=="goods"){
+        		this.$router.push({ 
+	                name: 'goodsSearchList',
+	                query: { searchValue:this.searchValue }
+	            })
+        	}
         },
         onCancel(){
         	console.log("ss")
+        },
+        searchTheOne(s){
+        	this.searchValue=s
+        	this.onSearch()
         },
         closeTag(s){
         	// 关闭历史标签
@@ -102,6 +117,10 @@ export default {
 		this.type=type
 		if(type=="project"){
 			this.localStorageStr="historySearchListPro"
+		}
+
+		if(type=="goods"){
+			this.localStorageStr="historySearchListGoods"
 		}
 
 		this.historySearchList=JSON.parse(window.localStorage.getItem(this.localStorageStr))||[]

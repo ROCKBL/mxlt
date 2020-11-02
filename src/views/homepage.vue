@@ -1,9 +1,9 @@
 <template>
     <div class="homepage">
-        <van-nav-bar title="医美"   class="pageNav" />
+        <van-nav-bar title="美享乐淘"   class="pageNav" />
       	<div class="pageContent">
     	  	<!-- 搜索框 -->
-            <van-search class="roundborder"  v-model="searchValue" placeholder="需要什么商品" @focus="gosearch" />
+            <van-search class="roundborder"  v-model="searchValue" placeholder="需要什么项目" @focus="gosearch" />
             
             <!-- 头部导航 -->
   <!--   	  	<van-tabs v-model="active" @click="tabClick">
@@ -16,12 +16,12 @@
             <!-- 轮播 -->
             <van-swipe class="my-swipe" :autoplay="3000" indicator-color="#999999">
               <van-swipe-item v-for=" pic in swipeList " :key="pic.url">
-                  <van-image width="100%"  :src="pic.images" @click="imgClick(pic.shopId)" />
+                  <van-image width="100%" fit="contain" height="180px"  :src="pic.images" @click="imgClick(pic.shopId)" />
               </van-swipe-item>
             </van-swipe>
             
             <!-- 产品分类 -->
-            <van-swipe class="my-swipe1" indicator-color="#999999">
+            <!-- <van-swipe class="my-swipe1" indicator-color="#999999">
                 <van-swipe-item class="swipeTypes">
                     <div class="swipeType" v-for="item in swipeList1" :key="item.url" @click="swipeTypeClick(item.url)">
                         <van-image class="swipeTypePic" :src="item.pic" />
@@ -34,7 +34,16 @@
                         <div class="swipeTypeName">{{ item.name }}</div>
                     </div>
                 </van-swipe-item>
+            </van-swipe> -->
+            <van-swipe class="my-swipe1 " indicator-color="#999999">
+                <van-swipe-item class="swipeTypes" v-for="list in swipeList1">
+                    <div class="swipeType" v-for="item in list" :key="item.id" @click="swipeTypeClick(item)">
+                        <van-image class="swipeTypePic" :src="item.images" fit="contain" height="50px" />
+                        <div class="swipeTypeName">{{ item.name }}</div>
+                    </div>
+                </van-swipe-item>
             </van-swipe>
+
             
             <!-- 活动专区 -->
             <div class="activitiesZone">
@@ -109,18 +118,18 @@ export default {
                 // {pic:require("../assets/imgs/16.png"),url:"33"},
             ], //第一个滑窗数据
             swipeList1:[
-                {url:"11",name:"O栈",pic:require('../assets/imgs/171.png')},
-                {url:"22",name:"嘀哒商城",pic:require('../assets/imgs/172.png')},
-                {url:"33",name:"医美严选",pic:require('../assets/imgs/173.png')},
-                {url:"44",name:"名医名项",pic:require('../assets/imgs/174.png')},
-                {url:"55",name:"医疗健康",pic:require('../assets/imgs/250.png')},
-                {url:"66",name:"眼部",pic:require('../assets/imgs/175.png')},
-                {url:"77",name:"鼻部",pic:require('../assets/imgs/176.png')},
-                {url:"88",name:"胸部",pic:require('../assets/imgs/177.png')},
-                {url:"99",name:"玻尿酸",pic:require('../assets/imgs/178.png')},
-                {url:"00",name:"除皱瘦脸",pic:require('../assets/imgs/249.png')},
+                // {url:"11",name:"O栈",pic:require('../assets/imgs/171.png')},
+                // {url:"22",name:"嘀哒商城",pic:require('../assets/imgs/172.png')},
+                // {url:"33",name:"医美严选",pic:require('../assets/imgs/173.png')},
+                // {url:"44",name:"名医名项",pic:require('../assets/imgs/174.png')},
+                // {url:"55",name:"医疗健康",pic:require('../assets/imgs/250.png')},
+                // {url:"66",name:"眼部",pic:require('../assets/imgs/175.png')},
+                // {url:"77",name:"鼻部",pic:require('../assets/imgs/176.png')},
+                // {url:"88",name:"胸部",pic:require('../assets/imgs/177.png')},
+                // {url:"99",name:"玻尿酸",pic:require('../assets/imgs/178.png')},
+                // {url:"00",name:"除皱瘦脸",pic:require('../assets/imgs/249.png')},
             ],//第二个滑窗第一屏数据
-            swipeList2:[{url:"11",name:"O栈",pic:require('../assets/imgs/171.png')},],//第二个滑窗第二屏数据
+            // swipeList2:[{url:"11",name:"O栈",pic:require('../assets/imgs/171.png')},],//第二个滑窗第二屏数据
 
             activities:[
                 {pic:require("../assets/imgs/24.png"),upWords:"VIP专区",downWords:"享受会员福利",pageType:"vip",pageTitle:"VIP专区",type:2,},
@@ -207,8 +216,12 @@ export default {
         imgClick(url){
             console.log(url)
         },
-        swipeTypeClick(url){
-            console.log(url)
+        swipeTypeClick(o){
+            console.log(o)
+            this.$router.push({
+                name: 'projectSearchList',
+                query: { category:o.id,pageTitle:o.name }
+            })
         },
         activityClick(active){
             var that=this;
@@ -228,6 +241,7 @@ export default {
                 })
             }).catch(function(error){
                 console.log(error)
+                
             })
 
             
@@ -308,6 +322,19 @@ export default {
                     that.activeList=response.result[0].name
                 }
                 
+                var ar=response.result
+                var times=Math.floor(ar.length/10)
+                var newAr=[]
+                
+                for(var i=0;i<times;i++){
+                    newAr.push(ar.splice(0,10))
+                }
+                if(ar.length>0){
+                    newAr.push(ar)
+                }
+                
+                that.swipeList1=newAr
+
             })
             this.axios.all([f1,f2]).then(function(){
                 that.getData()
@@ -327,7 +354,8 @@ export default {
             var data={
                 start:pageNum||1,
                 limit:10,
-                category:category
+                category:category,
+                type:0
             }
 
             return ppage(data).then(function(response){

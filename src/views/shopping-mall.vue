@@ -1,11 +1,11 @@
 <template>
-    <div>
+    <div class="shoppingMall">
         <!-- <van-nav-bar title="嘀哒商城" left-text="" right-text="" left-arrow @click-left="onClickLeft" class="pageNav" /> -->
         <van-nav-bar title="嘀哒商城" left-text="" right-text=""  class="pageNav" />
     	<div class="pageContent">
             <!-- 搜索框 -->
             <div class="shoppingMallHeader">
-                <van-search class="roundborder"  v-model="searchValue" placeholder="需要什么商品" />
+                <van-search class="roundborder"  v-model="searchValue" placeholder="需要什么商品" @focus="gosearch" />
                 <van-icon name="cart" size="24px" color="#FF8C34" @click="goCart" />
             </div>
           <!-- 头部ad -->
@@ -23,23 +23,23 @@
             <!-- 轮播 -->
             <van-swipe class="my-swipe" :autoplay="3000" indicator-color="#999999">
                 <van-swipe-item v-for=" pic in swipeList " :key="pic.url">
-                    <van-image width="100%"  :src="pic.images" @click="imgClick(pic.shopId)" />
+                    <van-image width="100%" fit="contain" height="180px" :src="pic.images" @click="imgClick(pic.shopId)" />
                 </van-swipe-item>
             </van-swipe>
             
             <van-swipe class="my-swipe1 " indicator-color="#999999">
-                <van-swipe-item class="swipeTypes">
-                    <div class="swipeType" v-for="item in swipeList1" :key="item.url" @click="swipeTypeClick(item.url)">
-                        <van-image class="swipeTypePic" :src="item.pic" />
+                <van-swipe-item class="swipeTypes" v-for="list in swipeList1">
+                    <div class="swipeType" v-for="item in list" :key="item.id" @click="swipeTypeClick(item)">
+                        <van-image class="swipeTypePic" :src="item.images"  fit="contain" height="50px"/>
                         <div class="swipeTypeName">{{ item.name }}</div>
                     </div>
                 </van-swipe-item>
             </van-swipe>
 
-            <van-image class="banner" width="100%"  :src="require('../assets/imgs/39.png')" />
+            <van-image class="banner" width="100%"  :src="require('../assets/imgs/getcoupon.png')" @click="goGetCoupons" />
             
             <!-- 限时秒杀 -->
-            <div class="flashSale">
+            <!-- <div class="flashSale">
                 <van-image class="flashSaleIcon" :src="require('../assets/imgs/clock.png')" />
                 <div class="flashSaleTitle">限时抢购</div>
                 <van-count-down :time="time" class="flashSaleTime">
@@ -52,19 +52,19 @@
                   </template>
                 </van-count-down>
                 <van-icon class="flashSaleRightIcon" name="arrow" color="#999999" />
-            </div>
+            </div> -->
             
             <!-- 商品特色 -->
             <div class="Recommend">
-                <div class="RecommendHead">
+                <div class="RecommendHead" @click="seeRecommendGoods">
                     <div class="RecommendHeadTitle">特色商品</div>
                     <van-icon class="RecommendHeadIcon" name="arrow" color="#999999" />
                 </div>
                 <div class="RecommendBody">
-                    <div v-for="Recommend in Recommends" class="RecommendProduct">
-                        <van-image class="RecommendPic" width="100%" :src="Recommend.pic" />
-                        <div class="RecommendName">￥{{ Recommend.name }}</div>
-                        <div class="RecommendPrice">￥{{ Recommend.price }}</div>
+                    <div v-for="r in Recommends" class="RecommendProduct" @click="clickProduct(r)">
+                        <van-image class="RecommendPic" width="100%" fit="contain" height="80px" :src="r.firstImage" />
+                        <div class="RecommendName">{{ r.name }}</div>
+                        <div class="RecommendPrice">￥{{ r.couponPrice }}</div>
                     </div>
                 </div>
             </div>
@@ -74,15 +74,16 @@
                 <van-divider :style="{ color: '#FF8C34', borderColor: '#FF8C34', padding: '0 15%' }">
                     精品推荐
                 </van-divider>
-                <!-- <van-list class="productListWrap" v-model="loading" :finished="finished" finished-text="没有更多了" @load="onLoad"> -->
+                <van-list class="productListWrap" v-model="loading" :finished="finished" finished-text="没有更多了" @load="onLoad">
                     <div class="productList">
                         <product class="product" v-for="product in products" :key="product.id" :productInfo="product" @clickProduct="clickProduct(product)"></product>
                     </div>
                     
-                <!-- </van-list> -->
+                </van-list>
             </div>
     	</div>
 
+        <div style="margin-bottom: 60px;"></div>
         <!-- 底部导航 -->
         <van-tabbar v-model="bottomActive" active-color="#FF8C34" @change="tabClickBottom">
             <van-tabbar-item v-for="btn in bottomButtonList" :icon="btn.icon">{{ btn.name}}</van-tabbar-item>
@@ -107,6 +108,8 @@ import store from '@/store'
 
 import { clist } from '@/api/carouselImage'
 
+import { glist,gpage } from '@/api/goods'
+
 export default {
   	name: '',
   	store,
@@ -121,36 +124,43 @@ export default {
 
             ],
             swipeList1:[
-                {url:"11",name:"保健品",pic:require('../assets/imgs/shoppingmall_1.png')},
-                {url:"22",name:"护肤专区",pic:require('../assets/imgs/shoppingmall_2.png')},
-                {url:"33",name:"术后修复",pic:require('../assets/imgs/shoppingmall_3.png')},
-                {url:"44",name:"彩妆专区",pic:require('../assets/imgs/shoppingmall_4.png')},
-                {url:"55",name:"生活必备",pic:require('../assets/imgs/shoppingmall_5.png')},
-                {url:"66",name:"网红爆款",pic:require('../assets/imgs/shoppingmall_6.png')},
-                {url:"77",name:"香奈儿",pic:require('../assets/imgs/shoppingmall_7.png')},
-                {url:"88",name:"圣罗兰",pic:require('../assets/imgs/shoppingmall_8.png')},
-                {url:"99",name:"雅诗兰黛",pic:require('../assets/imgs/shoppingmall_9.png')},
-                {url:"00",name:"法国娇兰",pic:require('../assets/imgs/shoppingmall_10.png')},
+                // [
+                //     {url:"11",name:"保健品",pic:require('../assets/imgs/shoppingmall_1.png')},
+                //     {url:"22",name:"护肤专区",pic:require('../assets/imgs/shoppingmall_2.png')},
+                //     {url:"33",name:"术后修复",pic:require('../assets/imgs/shoppingmall_3.png')},
+                //     {url:"44",name:"彩妆专区",pic:require('../assets/imgs/shoppingmall_4.png')},
+                //     {url:"55",name:"生活必备",pic:require('../assets/imgs/shoppingmall_5.png')},
+                //     {url:"66",name:"网红爆款",pic:require('../assets/imgs/shoppingmall_6.png')},
+                //     {url:"77",name:"香奈儿",pic:require('../assets/imgs/shoppingmall_7.png')},
+                //     {url:"88",name:"圣罗兰",pic:require('../assets/imgs/shoppingmall_8.png')},
+                //     {url:"99",name:"雅诗兰黛",pic:require('../assets/imgs/shoppingmall_9.png')},
+                //     {url:"00",name:"法国娇兰",pic:require('../assets/imgs/shoppingmall_10.png')},
+                // ],[
+                //     {url:"11",name:"保健品",pic:require('../assets/imgs/shoppingmall_1.png')},
+                //     {url:"22",name:"护肤专区",pic:require('../assets/imgs/shoppingmall_2.png')},
+                // ]
             ],
 
             time:0,
 
             Recommends:[
-                {name:"伊思红参蜗牛水乳套装",pic:require('../assets/imgs/x1.png'),price:"1400.00",url:"123"},
-                {name:"香奈儿邂逅系列 邂逅香水系列",pic:require('../assets/imgs/x2.png'),price:"580.00",url:"1234"},
-                {name:"倩碧匀净卓研淡斑双效精华露",pic:require('../assets/imgs/x3.png'),price:"3900.00",url:"1235"},
+                // {name:"伊思红参蜗牛水乳套装",pic:require('../assets/imgs/x1.png'),price:"1400.00",url:"123"},
+                // {name:"香奈儿邂逅系列 邂逅香水系列",pic:require('../assets/imgs/x2.png'),price:"580.00",url:"1234"},
+                // {name:"倩碧匀净卓研淡斑双效精华露",pic:require('../assets/imgs/x3.png'),price:"3900.00",url:"1235"},
             ],
 
             products:[
-                {name:"【奥昵玻尿酸0.5ml】守护 年轻的秘密",price:"1400.00",oldPrice:"1600",pic:require("../assets/imgs/23.png"),sellNum:224,id:1},
-                {name:"【奥昵玻尿酸0.5ml】守护 年轻的秘密",price:"1400.00",oldPrice:"1600",pic:require("../assets/imgs/22.png"),sellNum:224,id:2},
-                {name:"【奥昵玻尿酸0.5ml】守护 年轻的秘密",price:"1400.00",oldPrice:"1600",pic:require("../assets/imgs/21.png"),sellNum:224,id:3},
-                {name:"【奥昵玻尿酸0.5ml】守护 年轻的秘密",price:"1400.00",oldPrice:"1600",pic:require("../assets/imgs/18.png"),sellNum:224,id:4},
-                {name:"【奥昵玻尿酸0.5ml】守护 年轻的秘密",price:"1400.00",oldPrice:"1600",pic:require("../assets/imgs/17.png"),sellNum:224,id:5},
-                {name:"【奥昵玻尿酸0.5ml】守护 年轻的秘密",price:"1400.00",oldPrice:"1600",pic:require("../assets/imgs/19.png"),sellNum:224,id:6},
+                // {name:"【奥昵玻尿酸0.5ml】守护 年轻的秘密",price:"1400.00",oldPrice:"1600",pic:require("../assets/imgs/23.png"),sellNum:224,id:1},
+                // {name:"【奥昵玻尿酸0.5ml】守护 年轻的秘密",price:"1400.00",oldPrice:"1600",pic:require("../assets/imgs/22.png"),sellNum:224,id:2},
+                // {name:"【奥昵玻尿酸0.5ml】守护 年轻的秘密",price:"1400.00",oldPrice:"1600",pic:require("../assets/imgs/21.png"),sellNum:224,id:3},
+                // {name:"【奥昵玻尿酸0.5ml】守护 年轻的秘密",price:"1400.00",oldPrice:"1600",pic:require("../assets/imgs/18.png"),sellNum:224,id:4},
+                // {name:"【奥昵玻尿酸0.5ml】守护 年轻的秘密",price:"1400.00",oldPrice:"1600",pic:require("../assets/imgs/17.png"),sellNum:224,id:5},
+                // {name:"【奥昵玻尿酸0.5ml】守护 年轻的秘密",price:"1400.00",oldPrice:"1600",pic:require("../assets/imgs/19.png"),sellNum:224,id:6},
             ],
-            // loading:true,
-            // finished:false,
+            pageNum:1,
+            total:0,
+            loading:true,
+            finished:false,
 
             bottomActive:2,
             bottomButtonList:[
@@ -181,7 +191,18 @@ export default {
         },
   		goCart(){
             // 跳转购物车页面
+            this.$router.push("/cart")
         },
+        goGetCoupons(){
+            this.$router.push("/getCoupons")
+        },
+        gosearch(){
+            this.$router.push({ 
+                name: 'search',
+                query: { type:"goods" }
+            })
+        },
+
         onLoad(){},
         clickProduct(product){
             this.$router.push({ 
@@ -190,7 +211,15 @@ export default {
             })
         },
         imgClick(){},
-        swipeTypeClick(){},
+        swipeTypeClick(item){
+            console.log(item)
+            // name
+            // id
+            this.$router.push({
+                name:"goodsSearchList",
+                query:{cate:JSON.stringify(item)}
+            })
+        },
         init(){
             // 初始化界面数据
             var that=this;
@@ -201,17 +230,98 @@ export default {
                 // console.log(response)
                 that.swipeList=response.result
             })
+
+            // 商品分类
+            glist().then(function(response){
+                // console.log(response)
+                // 处理成二维数组,10个为一个数组
+                var ar=response.result
+                var times=Math.floor(ar.length/10)
+                // console.log(times)
+                var newAr=[]
+                
+                for(var i=0;i<times;i++){
+                    newAr.push(ar.splice(0,10))
+                }
+                if(ar.length>0){
+                    newAr.push(ar)
+                }
+                
+                that.swipeList1=newAr
+                // console.log(that.swipeList1)
+            })
+
+            this.getSpecialGoodsData().then(function(){
+                that.loading=false
+                if(that.products.length==that.total){
+                    that.finished=true
+                    return
+                }
+            })
+            this.getUniqueGoodsData()
         },
+        onLoad(){
+            var that=this;
+            this.pageNum+=1;
+            that.getSpecialGoodsData(that.pageNum).then(function(){
+                that.loading=false
+                if(that.products.length==that.total){
+                    that.finished=true
+                    return
+                }
+            })
+            
+        },
+        getSpecialGoodsData(pageNum){
+            // 精品推荐
+            var that=this
+            var data={
+                limit:10,
+                start:pageNum||1,
+                recommendIs:true
+            }
+            return gpage(data).then(function(response){
+                that.products=that.products.concat(response.result.items)
+                that.total=response.result.total
+            })
+        },
+        getUniqueGoodsData(){
+            // 特色商品
+            var that=this
+            gpage({
+                specialtyIs:true
+            }).then(function(response){
+                // console.log(response)
+                var rtn=response.result.items
+                if(rtn.length>3){
+                    rtn.length=3
+                }
+                
+                that.Recommends=rtn
+                // console.log(that.Recommends)
+            })
+        },
+
         tabClickBottom(index){
             // 底部跳转
             this.$router.replace(this.bottomButtonList[index].url)
         },
+
+        seeRecommendGoods(){
+            // 特色跳转
+            this.$router.push({
+                name:"goodsSearchList",
+                query:{specialtyIs:true}
+            })
+        },
   	},
   	mounted(){
-        this.time=60*60*1000;
+        // this.time=60*60*1000;
         this.init()
   	},
-  	created(){}
+  	created(){
+
+    }
 
 }
 </script>
@@ -339,6 +449,7 @@ export default {
         box-shadow: 0px 2px 10px rgba(0,0,0,0.2);
         box-sizing: border-box;
         padding: 20px 0px;
+        margin-top: 0px;
     }
     .Recommend .RecommendHead{
         display: flex;
@@ -364,6 +475,7 @@ export default {
         display: flex;
         justify-content: space-between;
         padding: 10px;
+        padding-bottom: 0px;
     }
     .Recommend .RecommendProduct{
         width: calc(33.33% - 6px);
@@ -421,14 +533,14 @@ export default {
     }
     
     /*猜你喜欢*/
-    .productList{
+    .shoppingMall .productList{
         width: calc(100% - 20px);
         margin: 20px auto;
         display: flex;
         flex-wrap: wrap;
 
     }
-    .product{
+    .shoppingMall .product{
         width: calc(50% - 10px);
         box-sizing: border-box;
         margin:5px 5px;

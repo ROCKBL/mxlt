@@ -8,17 +8,20 @@
                     <div class="diaryInfoContentHeadName">{{ name }}</div>
                     <div class="diaryInfoContentHeadDate">{{ date }}</div>
                 </div>
-                <div class="concern" v-if="concern">已关注</div>
-                <div class="unconcern" v-else><van-icon name="plus" />关注</div>
+                <div v-if="concern!=null" @click="concernsm" class="concernWrap">
+                    <div class="concern" v-if="concern">已关注</div>
+                    <div class="unconcern" v-else><van-icon name="plus" />关注</div>
+                </div>
+                
             </div>
             <div class="diaryInfoContentWords">{{ words }}</div>
             <van-image class="diaryInfoContentPic" v-for="pic in pics"  :src="pic" />
             <div class="diaryInfoContentFoot">
-                <div class="diaryInfoContentFootMessage"><van-icon name="chat-o" />{{ messages.length }}</div>
-                <div class="diaryInfoContentFootZan" :class="iszan?'zanActive':''"><van-icon :name="iszan?'like':'like-o'" />{{ zan }}</div>
+                <!-- <div class="diaryInfoContentFootMessage"><van-icon name="chat-o" />{{ messages.length }}</div> -->
+                <div class="diaryInfoContentFootZan" @click="zansm" :class="iszan?'zanActive':''"><van-icon :name="iszan?'like':'like-o'" />{{ zan }}</div>
             </div>
         </div>
-        <div class="diaryInfoMessageBox">
+        <!-- <div class="diaryInfoMessageBox">
             <div class="diaryInfoMessageBoxTitle">最新评论（{{ messages.length }}）</div>
             <div class="diaryInfoMessageItem" v-for="m in messages">
                 <van-image round class="diaryInfoMessageItemAvatar" :src="m.avatar" />
@@ -30,8 +33,8 @@
                     <div class="diaryInfoMessageItemMessage">{{ m.words }}</div>
                 </div>
             </div>
-        </div>
-        <van-search class="diaryInfoMessage" v-model="leaveMessage" shape="round"  placeholder="发表评价" left-icon="" />
+        </div> -->
+        <!-- <van-search class="diaryInfoMessage" v-model="leaveMessage" shape="round"  placeholder="发表评价" left-icon="" /> -->
     </div>
 </template>
 
@@ -39,37 +42,52 @@
 // @ is an alias to /src
 // import HelloWorld from '@/components/HelloWorld.vue'
 
-import Vue from 'vue'
+// import Vue from 'vue'
 import store from '@/store'
 
 // // 手动引入vant单个组件
 // import Button from 'vant/lib/button';
 // import 'vant/lib/button/style';
 
-import Vant from 'vant'
-import 'vant/lib/index.css'
-Vue.use(Vant)
+// import Vant from 'vant'
+// import 'vant/lib/index.css'
+// Vue.use(Vant)
+
+import { ddetail,disLike } from '@/api/diary'
+import { aAttentionAndCancel } from '@/api/attention'
 
 export default {
     name: '',
     store,
     data(){
         return{
-            leaveMessage:'',
-            messages:[
-                {avatar:"https://img.yzcdn.cn/vant/cat.jpeg",name:"乖咪",date:"2020-8-7",words:"自体脂肪填充泪沟要注意"},
-                {avatar:"https://img.yzcdn.cn/vant/cat.jpeg",name:"乖咪",date:"2020-8-7",words:"自体脂肪填充泪沟要注意"},
-                {avatar:"https://img.yzcdn.cn/vant/cat.jpeg",name:"乖咪",date:"2020-8-7",words:"自体脂肪填充泪沟要注意"},
-            ],
-            avatar:"https://img.yzcdn.cn/vant/cat.jpeg",
-            name:"乖咪",
-            date:"2020-8-7",
-            words:"自体脂肪填充泪沟要注意的7个雷区自体脂肪填充泪沟要注意的7个雷区自体脂肪填充泪沟要注意的7个雷区自体脂肪填充泪沟要注意的7个雷区自体脂肪填充泪沟要注意的7个雷区",
-            pics:["https://img.yzcdn.cn/vant/cat.jpeg","https://img.yzcdn.cn/vant/cat.jpeg"],
-            zan:0,
-            concern:false,
-            iszan:false
+            // leaveMessage:'',
+            // messages:[
+            //     {avatar:"https://img.yzcdn.cn/vant/cat.jpeg",name:"乖咪",date:"2020-8-7",words:"自体脂肪填充泪沟要注意"},
+            //     {avatar:"https://img.yzcdn.cn/vant/cat.jpeg",name:"乖咪",date:"2020-8-7",words:"自体脂肪填充泪沟要注意"},
+            //     {avatar:"https://img.yzcdn.cn/vant/cat.jpeg",name:"乖咪",date:"2020-8-7",words:"自体脂肪填充泪沟要注意"},
+            // ],
+            // avatar:"https://img.yzcdn.cn/vant/cat.jpeg",
+            // name:"乖咪",
+            // date:"2020-8-7",
+            // words:"自体脂肪填充泪沟要注意的7个雷区自体脂肪填充泪沟要注意的7个雷区自体脂肪填充泪沟要注意的7个雷区自体脂肪填充泪沟要注意的7个雷区自体脂肪填充泪沟要注意的7个雷区",
+            // pics:["https://img.yzcdn.cn/vant/cat.jpeg","https://img.yzcdn.cn/vant/cat.jpeg"],
+            // zan:0,
+            // concern:false,
+            // iszan:false
 
+
+            avatar:"",
+            name:"",
+            date:"",
+            words:"",
+            pics:[],
+            zan:0,
+            concern:null,
+            iszan:false,
+            diaryInfo:{},
+
+            diaryId:null,
         }
     },
     computed:{
@@ -85,6 +103,46 @@ export default {
         },
         goPublish(){
             this.$router.push("/diaryRecord")
+        },
+        getData(){
+            var that=this;
+            ddetail({
+                id:this.diaryId
+            }).then(function(response){
+                // console.log(response)
+                var res=response.result
+                that.diaryInfo=res
+
+                that.avatar=res.consumerAvatar
+                that.name=res.consumerName
+                that.date=new Date(res.createTime).Format("yyyy-MM-dd")
+                that.words=res.detail
+
+                that.pics=res.images.split(",")
+                that.zan=res.likeNum||0
+                that.iszan=res.likeIs
+
+                that.concern=res.attentionIs
+
+            })
+        },
+        concernsm(){
+            var that=this;
+            aAttentionAndCancel({
+                consumerId:this.diaryInfo.consumerId
+            }).then(function(response){
+                // console.log(response)
+                that.getData()
+            })
+        },
+        zansm(){
+            var that=this;
+            disLike({
+                diaryId:this.diaryId
+            }).then(function(response){
+                // console.log(response)
+                that.getData()
+            })
         }
         
     },
@@ -93,6 +151,8 @@ export default {
     },
     created(){
         // 初始化数据
+        this.diaryId=this.$router.currentRoute.query.id
+        this.getData()
 
     }
 
@@ -154,15 +214,17 @@ export default {
         height: 40px;
         margin-right: 10px;
     }
-    .diaryInfo .concern{
+    .diaryInfo .concernWrap{
         margin-left: auto;
+    }
+    .diaryInfo .concern{
+        
         border-radius:10px;
         color: #999999;
         border:1px solid rgba(153,153,153,1);
         padding: 2px 10px;
     }
     .diaryInfo .unconcern{
-        margin-left: auto;
         color: white;
         background-color: #FF8C34;
         border-radius:10px;

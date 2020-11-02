@@ -4,47 +4,52 @@
 
 		<div class="order">
 			<div class="orderProduct">
-				<van-image class="orderProductPic" width="60" height="60" :src="productPic" />
+				<van-image class="orderProductPic" width="60" height="60" :src="orderInfo.firstImage" />
 				<div class="orderProductInfo">
-					<div class="orderProductInfoName">{{ productName }}</div>
-					<div class="orderProductInfoPrice">预约价￥<span class="orderProductInfoPriceNum">{{ productPrice }}</span></div>
+					<div class="orderProductInfoName">{{ orderInfo.projectName }}</div>
+					<div class="orderProductInfoPrice" v-if="orderInfo.realityMoney">
+						预约价:
+						<span class="orderProductInfoPriceNum" >￥{{ orderInfo.realityMoney }}</span>
+					</div>
+					<div v-else class="orderProductInfoPrice">未付款</div>
 				</div>
 			</div>
 			<div class="orderHospital">
-				<van-image class="orderHospitalPic" round width="60" height="60" :src="hospitalPic" />
+				<van-image class="orderHospitalPic" round width="60" height="60" :src="orderInfo.hospitalLogo" />
 				<div class="orderHospitalInfo">
-					<div class="orderHospitalInfoName">{{ hospitalName }}</div>
-					<div class="orderHospitalInfoIcon"><van-icon class="iconfont " class-prefix='icon' name='yiyuan' size="10" />医院</div>
-					<div class="orderHospitalInfoAddress"><van-icon name="location-o" />{{ hospitalAddress }}</div>
+					<div class="orderHospitalInfoName">{{ orderInfo.hospitalName }}</div>
+					<div class="orderHospitalInfoIcon"><van-icon class="iconfont " class-prefix='icon' name='yiyuan' size="10" />{{ orderInfo.hospitalType }}</div>
+					<div class="orderHospitalInfoAddress"><van-icon name="location-o" />{{ orderInfo.hospitalAddress }}</div>
 				</div>
 			</div>
 		</div>
 		<div class="appointment">
 			<div class="appointmentRow">
 				<div class="appointmentRowLabel">预约姓名</div>
-				<div class="appointmentRowValue">{{ name }}</div>
+				<div class="appointmentRowValue">{{ orderInfo.name }}</div>
 			</div>
 			<div class="appointmentRow">
 				<div class="appointmentRowLabel">预约日期</div>
-				<div class="appointmentRowValue">{{ date }}</div>
+				<div class="appointmentRowValue">{{ new Date(orderInfo.appointmentTime).Format("yyyy-MM-dd") }}</div>
 			</div>
-			<div class="appointmentRow">
+			<!-- <div class="appointmentRow">
 				<div class="appointmentRowLabel">支付方法</div>
-				<div class="appointmentRowValue">{{ payWay }}</div>
-			</div>
+				<div class="appointmentRowValue">{{ orderInfo.payWay }}</div>
+			</div> -->
 			<div class="appointmentRow">
 				<div class="appointmentRowLabel">联系方式</div>
-				<div class="appointmentRowValue">{{ phone }}</div>
+				<div class="appointmentRowValue">{{ orderInfo.phone }}</div>
 			</div>
 			<div class="appointmentRow">
 				<div class="appointmentRowLabel">项目价格</div>
-				<div class="appointmentRowValue">￥{{ money }}</div>
+				<div class="appointmentRowValue">￥{{ orderInfo.money }}</div>
 			</div>
 
-			<div class="appointmentRow erweimaRow">
+			<div class="appointmentRow erweimaRow" v-if="orderInfo.orderState==1">
 				<div class="appointmentRowLabel">预约码</div>
 				<div class="erweima">
-					<van-image width="100" height="100" src="https://img.yzcdn.cn/vant/cat.jpeg" />
+					<!-- <van-image width="100" height="100" src="https://img.yzcdn.cn/vant/cat.jpeg" /> -->
+					<vue-qr  :text="confirmUrl" :size="150"></vue-qr>
 				</div>
 				
 			</div>
@@ -56,46 +61,58 @@
 // @ is an alias to /src
 // import HelloWorld from '@/components/HelloWorld.vue'
 
-import Vue from 'vue';
+// import Vue from 'vue';
 import store from '@/store';
 
 // // 手动引入vant单个组件
 // import Button from 'vant/lib/button';
 // import 'vant/lib/button/style';
 
-import Vant from 'vant';
-import 'vant/lib/index.css';
-import { Dialog } from 'vant';
+// import Vant from 'vant';
+// import 'vant/lib/index.css';
+// import { Dialog } from 'vant';
 
-Vue.use(Vant);
-Vue.use(Dialog);
+// Vue.use(Vant);
+// Vue.use(Dialog);
+
+import VueQr from 'vue-qr'//二维码
+
+import { pdetails } from '@/api/project'
+
 
 export default {
 	name: '',
 	store,
 	data(){
 		return{
-			money:"289.00",
-			phone:"15058718329",
-			payWay:"余额",
-			date:"2020-08-20",
-			name:"姓名",
+			// money:"289.00",
+			// phone:"15058718329",
+			// payWay:"余额",
+			// date:"2020-08-20",
+			// name:"姓名",
 
-			productPic:"https://img.yzcdn.cn/vant/cat.jpeg",
-			productName:"【奥昵玻尿酸0.5ml】守护年轻的秘密",
-			productPrice:"10.00",
+			// productPic:"https://img.yzcdn.cn/vant/cat.jpeg",
+			// productName:"【奥昵玻尿酸0.5ml】守护年轻的秘密",
+			// productPrice:"10.00",
 
-			hospitalName:"亚太美立方医疗美容",
-			hospitalPic:"https://img.yzcdn.cn/vant/cat.jpeg",
-			hospitalAddress:"浙江省 杭州市 滨江区江陵路1916号星耀城二期3栋1501"
+			// hospitalName:"亚太美立方医疗美容",
+			// hospitalPic:"https://img.yzcdn.cn/vant/cat.jpeg",
+			// hospitalAddress:"浙江省 杭州市 滨江区江陵路1916号星耀城二期3栋1501"
+
+			orderId:null,
+			orderInfo:{},
 		}
 	},
 	computed:{
-		
+		confirmUrl(){
+			// return "http://www.baidu.com?orderId="+this.orderId
+			return window.location.origin+"/user/projectOrder/modifyConfirm?orderNo="+this.orderInfo.orderNo
+		}
 	},
 	watch:{},
 	components: {
 		// HelloWorld
+		VueQr
 	},
 	methods:{
 		onClickLeft(){
@@ -110,6 +127,15 @@ export default {
         },
         confirmOrder(order){
         	// 确认订单
+        },
+        getData(){
+        	var that=this;
+        	pdetails({
+        		id:this.orderId
+        	}).then(function(res){
+        		console.log(res)
+        		that.orderInfo=res.result
+        	})
         }
 
 	},
@@ -117,6 +143,8 @@ export default {
 
 	},
 	created(){
+		this.orderId=this.$router.currentRoute.query.id
+		this.getData()
 
 	}
 

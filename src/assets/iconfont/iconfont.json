@@ -6,6 +6,104 @@
   "description": "",
   "glyphs": [
     {
+      "icon_id": "5205859",
+      "name": "针管",
+      "font_class": "icon1",
+      "unicode": "e60d",
+      "unicode_decimal": 58893
+    },
+    {
+      "icon_id": "13543855",
+      "name": "美妆",
+      "font_class": "meizhuang",
+      "unicode": "e620",
+      "unicode_decimal": 58912
+    },
+    {
+      "icon_id": "12476913",
+      "name": "优惠券",
+      "font_class": "youhuiquan",
+      "unicode": "e60c",
+      "unicode_decimal": 58892
+    },
+    {
+      "icon_id": "925473",
+      "name": "进度条-钱袋",
+      "font_class": "jindutiaoqiandai",
+      "unicode": "e643",
+      "unicode_decimal": 58947
+    },
+    {
+      "icon_id": "376212",
+      "name": "钱包",
+      "font_class": "qianbao2",
+      "unicode": "e64f",
+      "unicode_decimal": 58959
+    },
+    {
+      "icon_id": "614576",
+      "name": "礼品",
+      "font_class": "lipin",
+      "unicode": "e633",
+      "unicode_decimal": 58931
+    },
+    {
+      "icon_id": "6249916",
+      "name": "预约",
+      "font_class": "yuyue",
+      "unicode": "e61a",
+      "unicode_decimal": 58906
+    },
+    {
+      "icon_id": "8282000",
+      "name": "商城",
+      "font_class": "shangcheng",
+      "unicode": "e614",
+      "unicode_decimal": 58900
+    },
+    {
+      "icon_id": "12329539",
+      "name": "邀请好友",
+      "font_class": "yaoqinghaoyou",
+      "unicode": "e7b5",
+      "unicode_decimal": 59317
+    },
+    {
+      "icon_id": "6446106",
+      "name": "钱包",
+      "font_class": "tianchongxing-",
+      "unicode": "e62c",
+      "unicode_decimal": 58924
+    },
+    {
+      "icon_id": "9306311",
+      "name": "微信支付",
+      "font_class": "weixinzhifu",
+      "unicode": "e689",
+      "unicode_decimal": 59017
+    },
+    {
+      "icon_id": "1411085",
+      "name": "2医院",
+      "font_class": "yiyuan",
+      "unicode": "e636",
+      "unicode_decimal": 58934
+    },
+    {
+      "icon_id": "5849193",
+      "name": "通知",
+      "font_class": "tongzhi",
+      "unicode": "e607",
+      "unicode_decimal": 58887
+    },
+    {
+      "icon_id": "551215",
+      "name": "通知",
+      "font_class": "notice",
+      "unicode": "e60a",
+      "unicode_decimal": 58890
+    },
+    {
       "icon_id": "15226164",
       "name": "订单-已完成",
       "font_class": "dingdan-yiwancheng",

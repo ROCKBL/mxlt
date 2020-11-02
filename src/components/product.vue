@@ -1,19 +1,35 @@
 <template>
   <div class="product" @click="onClick">
-      <van-image class="productPic" width="100%"  :src="productInfo.firstImage" />
-      <div class="productName">{{ productInfo.name }}</div>
+      <div style="display: flex;align-items: center;justify-content: center;">
+        <van-image class="productPic" width="100%" height="150px" fit="contain"  v-if="productInfo.firstImage" :src="productInfo.firstImage" />
+      </div>
+      <!-- <van-image class="productPic" width="100%" v-if="productInfo.projectImages" :src="productInfo.projectImages" /> -->
+      
+
+      <div class="productName" v-if="productInfo.name">{{ productInfo.name }}</div>
+      <!-- <div class="productName" v-if="productInfo.projectName">{{ productInfo.projectName }}</div> -->
+
       <div class="productCompanyWrap" v-if="productInfo.hospitalName">
         <van-image class="productCompanyPic" :src="require('../assets/imgs/196.png')" />
         <div class="productCompany">{{ productInfo.hospitalName }}</div>
       </div>
+
       <div class="productOldPrice" v-if=" hasKey('oldPrice') ">￥{{ productInfo.oldPrice }}</div>
+
       <div class="productPriceWrap">
-        <div class="productPrice">￥{{ productInfo.price }}</div>
+        
+        <div class="productPrice" v-if="productInfo.price">￥{{ productInfo.price }}</div>
+        <!-- <div class="productPrice" v-if="productInfo.projectPrice">￥{{ productInfo.projectPrice }}</div> -->
+
         <div class="productSellNum" v-if=" hasKey('sellNum') " >已售{{ productInfo.sellNum }}</div>
 
         <slot name="btn"></slot>
       </div>
 
+      <div v-if="productInfo.goodsDeleteTime||productInfo.projectDeleteTime" class="mask">
+        <div v-if="productInfo.goodsDeleteTime">该商品已删除</div>
+        <div v-if="productInfo.projectDeleteTime">该项目已删除</div>
+      </div>
   </div>
 </template>
 
@@ -70,6 +86,7 @@ export default {
     text-align: left;
     padding: 5px 5px;
     padding-bottom: 10px;
+    position: relative;
   }
   .productName{
     font-size: 14px;
@@ -108,5 +125,17 @@ export default {
     margin-right: 5px;
   }
 
-
+  .mask{
+    position: absolute;
+    width: 100%;
+    height: 100%;
+    left: 0px;
+    top: 0px;
+    background-color: rgba(255,255,255,0.7);
+    pointer-events: none;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: #999;
+  }
 </style>

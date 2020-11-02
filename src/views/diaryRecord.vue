@@ -6,7 +6,7 @@
 			<van-cell class="messageBoxHead"  title="选择分类" is-link :value="diaryType" icon="apps-o" @click="showPicker=true" />
 			<van-field class="messageBoxBody" v-model="message" rows="6"  label="" type="textarea" placeholder="分享你的新鲜事儿吧，小可爱~" />
 		</div>
-		<van-uploader class="picUpLoader" v-model="fileList" multiple :after-read="afterRead" />
+		<van-uploader class="picUpLoader" v-model="fileList" multiple :after-read="afterRead" :max-size="10 * 1024 * 1024" @oversize="onOversize" @delete="deleteImg" />
 
 		<van-popup v-model="showPicker" round position="bottom">
 		  <van-picker
@@ -14,6 +14,8 @@
 		    :columns="columns"
 		    @cancel="showPicker = false"
 		    @confirm="onConfirm"
+
+		    value-key="name"
 		  />
 		</van-popup>
 	</div>
@@ -30,12 +32,15 @@ import store from '@/store';
 // import Button from 'vant/lib/button';
 // import 'vant/lib/button/style';
 
-import Vant from 'vant';
-import 'vant/lib/index.css';
-import { Dialog } from 'vant';
+// import Vant from 'vant';
+// import 'vant/lib/index.css';
+import { Dialog,Toast } from 'vant';
 
-Vue.use(Vant);
+// Vue.use(Vant);
 Vue.use(Dialog);
+Vue.use(Toast);
+
+import { dpublish,dclist,dupload,uploadUrl,ddetail,dmodfiy } from '@/api/diary'
 
 export default {
 	name: '',
@@ -43,18 +48,25 @@ export default {
 	data(){
 		return{
 			fileList: [
-		        { url: 'https://img.yzcdn.cn/vant/leaf.jpg' },
-
+		        // { url: 'https://img.yzcdn.cn/vant/leaf.jpg' },
 		    ],
+		    // fileAr:[],
 		    message:"",
 		    showPicker:false,
 
 		    diaryType:"请选择",
-		    columns:["除皱瘦脸","脂肪填充","美体塑形","眼部","鼻部","玻尿酸"]
+		   	diaryId:"",
+
+		    columns:[
+		    	// "除皱瘦脸","脂肪填充","美体塑形","眼部","鼻部","玻尿酸"
+		    ],
+		    id:null,
+
+		    type:"add",//add:新增，edite:修改编辑
 		}
 	},
 	computed:{
-		
+
 	},
 	watch:{},
 	components: {
@@ -64,19 +76,95 @@ export default {
 		onClickLeft(){
             this.$router.go(-1)
         },
-        publish(){},
+        onOversize(file) {
+	      // console.log(file);
+	      Toast('文件大小不能超过 10MB');
+	    },
+	    deleteImg(file){
+	    	// console.log(file)
+	    	// console.log(this.fileList)
+	    },
+        publish(){
+        	if(this.fileList.length==0){
+        		Toast('必须至少上传一张图片');
+        		return
+        	}
+        	if(this.diaryId==""){
+        		Toast('请求选择日记分类');
+        		return
+        	}
+
+        	var ar=[]
+        	this.fileList.map(function(obj){
+        		ar.push(obj.url)
+        	})
+
+        	var that=this;
+
+        	if(this.type=="edite"){
+        		dmodfiy({
+        			id:this.id,
+        			diaryCategory:this.diaryId,
+	        		images:ar.join(","),
+	        		detail:this.message,
+	        		title:"默认",
+        		}).then(function(response){
+        			that.$router.go(-1)
+        		})
+        		return
+        	}
+
+
+        	dpublish({
+        		diaryCategory:this.diaryId,
+        		images:ar.join(","),
+        		detail:this.message,
+        		title:"默认",
+        	}).then(function(){
+        		that.$router.go(-1)
+        	})
+
+        },
         afterRead(file){
+        	var that=this;
+        	var index=this.fileList.length;
+
+        	console.log(file);
+        	var formData = new FormData();
+        	formData.append('file', file.file);
+
         	file.status='uploading';
         	file.message='上传中...';
-        	console.log(file);
-        	setTimeout(function(){
+        	dupload(formData).then(function(response){
+        		console.log(response)
+  				file.url=that.picBaseUrl+response.result.url
         		file.status='done'
-        	},2000)
+
+        		console.log(that.fileList)
+        	})
+        	
+        	// setTimeout(function(){
+        		
+        	// },2000)
         },
         onConfirm(val){
         	// console.log(val)
         	this.showPicker=false
-        	this.diaryType=val
+
+        	console.log(val)
+
+        	this.diaryType=val.name
+        	this.diaryId=val.id
+        },
+        init(){
+        	var that=this;
+
+            return dclist().then(function(response){
+                console.log(response)
+                that.columns=response.result
+                // that.activeType=response.result[0].id
+
+            })
         }
 	},
 	mounted(){
@@ -85,6 +173,33 @@ export default {
 	created(){
 		// 写新日记或者编辑老的日记
 		// this.$router.currentRoute.query
+		var that=this;
+
+		if(this.$router.currentRoute.query.id){
+			this.type="edite"
+			this.id=this.$router.currentRoute.query.id
+			this.init().then(function(){
+				ddetail({
+					id:that.id
+				}).then(function(response){
+					// console.log(response)
+					var res=response.result
+					that.message=res.detail
+					that.diaryId=res.diaryCategory
+					that.fileList=res.images.split(",").map(function(url){
+						return {url:url}
+					})
+
+					var obj=that.columns.find(function(o){
+						return o.id==that.diaryId
+					})
+					that.diaryType=obj.name
+				})
+			})
+		}else{
+			this.init()
+		}
+		
 	}
 
 }

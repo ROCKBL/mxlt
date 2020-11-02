@@ -82,7 +82,9 @@ const routes = [
     // 商城:编辑地址
     path: '/editeAddress',
     name: 'editeAddress',
-    component: () => import('../views/editeAddress.vue')
+    // component: () => import('../views/editeAddress.vue')
+    component: () => import('../views/addAddress.vue')
+    
     // component: shoppingMall
   },
   {
@@ -114,6 +116,13 @@ const routes = [
     // component: shoppingMall
   },
   {
+    // 创建商品订单
+    path: '/createGoodsOrder',
+    name: 'createGoodsOrder',
+    component: () => import('../views/createGoodsOrder.vue')
+    // component: shoppingMall
+  },
+  {
     // 订单详情
     path: '/orderInfo',
     name: 'orderInfo',
@@ -135,6 +144,12 @@ const routes = [
     // component: shoppingMall
   },
 
+  {
+    // 获取优惠券
+    path: '/getCoupons',
+    name: 'getCoupons',
+    component: () => import('../views/getCoupons.vue')
+  },
   
 
   // 预约和商城共享页
@@ -224,6 +239,13 @@ const routes = [
     // component: shoppingMall
   },
   {
+    // 我的关注
+    path: '/myAttention',
+    name: 'myAttention',
+    component: () => import('../views/myAttention.vue')
+    // component: shoppingMall
+  },
+  {
     // 我的收藏
     path: '/myCollect',
     name: 'myCollect',
@@ -265,6 +287,15 @@ const routes = [
     component: () => import('../views/myWallet.vue')
     // component: shoppingMall
   },
+
+  {
+    // 立即提现
+    path: '/withdraw',
+    name: 'withdraw',
+    component: () => import('../views/withdraw.vue')
+    // component: shoppingMall
+  },
+
   {
     // 我的明细
     path: '/myCostDetail',
@@ -278,6 +309,13 @@ const routes = [
     path: '/myTeam',
     name: 'myTeam',
     component: () => import('../views/myTeam.vue')
+    // component: shoppingMall
+  },
+  {
+    // 我的推广
+    path: '/popularize',
+    name: 'popularize',
+    component: () => import('../views/popularize.vue')
     // component: shoppingMall
   },
 
@@ -297,8 +335,22 @@ const routes = [
     // component: shoppingMall
   },
 
-  
 
+  
+  {
+    // 提示在微信中打开
+    path: '/openInWeiXin',
+    name: 'openInWeiXin',
+    component: () => import('../views/openInWeiXin.vue')
+    // component: shoppingMall
+  },
+  {
+    // 项目微信支付成功提示页
+    path: '/successPay',
+    name: 'successPay',
+    component: () => import('../views/successPay.vue')
+    // component: shoppingMall
+  },
 
   // {
   //   path: '/about',

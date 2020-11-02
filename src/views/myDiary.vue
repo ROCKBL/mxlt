@@ -4,14 +4,14 @@
 
         <div class="userInfoBox">
             <div class="userInfo">
-                <van-image class="userInfoPic" round width="50" height="50" src="https://img.yzcdn.cn/vant/cat.jpeg" />
+                <van-image class="userInfoPic" round width="50" height="50" :src="someone?someone.avatar:userInfo.avatar" />
                 <div class="userInfoShort">
-                    <div class="userInfoName">{{ userName }}</div>
+                    <div class="userInfoName">{{ someone?someone.consumerName:userInfo.name }}</div>
                     <div class="userInfoSignature">{{ signature }}</div>
                 </div>
             </div>
             <div class="userActions">
-                <div class="userActionsRow">
+                <div class="userActionsRow" @click="seeAttention">
                     <div class="userActionsRowLabel">关注</div>
                     <div class="userActionsRowNum">{{ attentionNum }}</div>
                 </div>
@@ -28,16 +28,16 @@
         
         <van-list class="diarysWrap" v-model="loading" :finished="finished" finished-text="没有更多了" @load="onLoad">
             <div class="diarys">
-                <div class="diary" v-for="diary in diarys">
-                    <van-image class="diaryPic" :src="diary.pic" />
-                    <div class="diaryWords">{{ diary.words }}</div>
+                <div class="diary" v-for="diary in diarys" @click="seeDiary(diary)">
+                    <van-image class="diaryPic" width="100%" fit="contain"  :src="diary.images.split(',')[0]" />
+                    <div class="diaryWords">{{ diary.detail }}</div>
                     <div class="diaryFoot">
-                        <van-image round class="diaryAvatar" :src="diary.avatar" />
-                        <div class="diaryUserName">{{ diary.userName }}</div>
-                        <div class="diaryZan" :class="diary.iszan?'zanActive':''"><van-icon :name="diary.iszan?'like':'like-o'" />{{ diary.zan }}</div>
+                        <van-image round class="diaryAvatar" :src="diary.consumerAvatar" />
+                        <div class="diaryUserName">{{ diary.consumerName }}</div>
+                        <div class="diaryZan" :class="diary.likeIs?'zanActive':''"><van-icon :name="diary.likeIs?'like':'like-o'" />{{ diary.likeNum||0 }}</div>
                     </div>
 
-                    <div class="shadowBtn" @click="dealWithDiary(diary)"><van-icon name="ellipsis" /></div>
+                    <div class="shadowBtn" v-if="!someone" @click.stop="dealWithDiary(diary)"><van-icon name="ellipsis" /></div>
                 </div>
             </div>
         </van-list>
@@ -53,53 +53,68 @@
 // @ is an alias to /src
 // import HelloWorld from '@/components/HelloWorld.vue'
 
-import Vue from 'vue'
+// import Vue from 'vue'
 import store from '@/store'
 
 // // 手动引入vant单个组件
 // import Button from 'vant/lib/button';
 // import 'vant/lib/button/style';
 
-import Vant from 'vant'
-import 'vant/lib/index.css'
+// import Vant from 'vant'
+// import 'vant/lib/index.css'
 
 
-Vue.use(Vant)
+// Vue.use(Vant)
 
 // 阿里图标文件
 // import "@/assets/iconfont/iconfont.css";
 
+import { ddelete,dpage,dindex } from '@/api/diary'
+import { mapState } from 'vuex'
 
 export default {
   	name: '',
   	store,
   	data(){
 		return{
-            userName:"格尔",
-            signature:"个性签名的内容个性签名的内容个性签名的内",
-            attentionNum:2,
-            zanNum:3,
-            postNum:9,
+            // userName:"格尔",
+            // signature:"未设置个性签名",
+            attentionNum:0,
+            zanNum:0,
+            postNum:0,
 
-            loading:false,
-            finished:false,
+
             diarys:[
-                {pic:"https://img.yzcdn.cn/vant/cat.jpeg",avatar:"https://img.yzcdn.cn/vant/cat.jpeg",userName:"辅导课",zan:2,iszan:true,words:"自体脂肪填充泪沟要注意的7个雷区"},
-                {pic:"https://img.yzcdn.cn/vant/cat.jpeg",avatar:"https://img.yzcdn.cn/vant/cat.jpeg",userName:"辅导课",zan:2,iszan:true,words:"自体脂肪填充泪沟要注意的7个雷区"},
-                {pic:"https://img.yzcdn.cn/vant/cat.jpeg",avatar:"https://img.yzcdn.cn/vant/cat.jpeg",userName:"辅导课",zan:2,iszan:false,words:"自体脂肪填充泪沟要注意的7个雷区"},
+                // {pic:"https://img.yzcdn.cn/vant/cat.jpeg",avatar:"https://img.yzcdn.cn/vant/cat.jpeg",userName:"辅导课",zan:2,iszan:true,words:"自体脂肪填充泪沟要注意的7个雷区"},
+                // {pic:"https://img.yzcdn.cn/vant/cat.jpeg",avatar:"https://img.yzcdn.cn/vant/cat.jpeg",userName:"辅导课",zan:2,iszan:true,words:"自体脂肪填充泪沟要注意的7个雷区"},
+                // {pic:"https://img.yzcdn.cn/vant/cat.jpeg",avatar:"https://img.yzcdn.cn/vant/cat.jpeg",userName:"辅导课",zan:2,iszan:false,words:"自体脂肪填充泪沟要注意的7个雷区"},
             ],
 
             actionShowFlag:false,
             actionList:["请选择","编辑","删除","取消"],
 
             diaryClicked:null,// 被点击弹出选择框的日记
+
+            loading:true,
+            finished:false,
+            pageNum:1,
+            total:0,
+
+            someone:null,//其他用户的日记页相关信息
 		}
   	},
   	computed:{
+        signature(){
+            var signature=this.someone?this.someone.sign:this.userInfo.sign
+            return signature?signature:"未设置个性签名"
+        },
         pageTitle(){
-
-            return this.userName+"的主页"
-        }
+            var name=this.someone?this.someone.consumerName:this.userInfo.name
+            return name+"的主页"
+        },
+        ...mapState({
+            userInfo(state){ return state.userInfo},
+        })
   	},
   	watch:{},
   	components: {
@@ -112,7 +127,16 @@ export default {
         init(){
             // 初始化界面数据
         },
-
+        seeDiary(diary){
+            console.log(diary)
+            this.$router.push({ 
+                name: 'diaryInfo',
+                query: { id:diary.id }
+            })
+        },
+        seeAttention(){
+            this.$router.push('/myAttention')
+        },
         onLoad(){
             // 列表下拉加载
             // console.log("aax")
@@ -121,28 +145,50 @@ export default {
             //     that.products=that.products.concat(that.addproducts)
             //     that.loading=false
             // },5000)
+
+            var that=this;
+            this.pageNum+=1;
+
+            this.getData(this.pageNum).then(function(){
+                that.loading=false
+                if(that.diarys.length==that.total){
+                    that.finished=true
+                    return
+                }
+            });
         },
         dealWithDiary(diary){
             this.actionShowFlag=true
             this.diaryClicked=diary
         },
         actionConfirm(item){
+            var that=this;
             if(item=="请选择"){
                 return
             }
             if(item=="编辑"){
                 this.actionShowFlag=false
                 // 跳转
-                this.$router.replace({
+                this.$router.push({
                     name:"diaryRecord",
                     query:{
-                        diaryId:"1"
+                        id:this.diaryClicked.id
                     }
                 })
                 return
             }
             if(item=="删除"){
                 this.actionShowFlag=false
+                ddelete({
+                    id:this.diaryClicked.id
+                }).then(function(response){
+                    console.log(response)
+                    that.diarys.length=0
+                    that.finished=false
+                    that.pageNum=1
+                    that.getData()
+                })
+
                 // 删除
                 return
             }
@@ -150,15 +196,69 @@ export default {
                 this.actionShowFlag=false
             }
             
+        },
+        getData(pageNum){
+            pageNum=pageNum||1
+            var that=this;
+
+            var consumerId=this.someone?this.someone.attentionId:this.userInfo.id
+
+            var data={
+                consumerId:consumerId,
+                start:pageNum,
+                limit:10
+            }
+            return dpage(data).then(function(response){
+                // console.log(response)
+                that.total=response.result.total
+                that.diarys=that.diarys.concat(response.result.items)
+            })
+        },
+        getIndexData(){
+            // 获取关注数，贴数，获赞数
+            var that=this;
+            var consumerId=this.someone?this.someone.attentionId:this.userInfo.id
+
+            dindex({
+                consumerId:consumerId,
+            }).then(function(res){
+                // console.log(res)
+                that.attentionNum=res.result.attentionNum
+                that.zanNum=res.result.likeNum
+                that.postNum=res.result.diaryNum
+            })
         }
 
   	},
   	mounted(){
 
-
   	},
   	created(){
+        // 判断是否看其他的日记首页
+        var user=this.$router.currentRoute.query.user
+        console.log(this.$router.currentRoute)
+        if(user){
+            this.someone=JSON.parse(user)
+            console.log(this.someone)
+        }
+
         // 初始化数据
+        var that=this;
+        store.state.userPromiseFlag.then(function(){
+
+            console.log(that.userInfo)
+            // 获取列表数据
+            that.getData().then(function(){
+                that.loading=false
+                if(that.diarys.length==that.total){
+                    that.finished=true
+                    return
+                }
+            })
+
+            // 获取统计数据
+            that.getIndexData()
+        })
 
     }
 
@@ -256,6 +356,7 @@ export default {
     .myDiary .diaryPic img{
         border-radius: 10px 10px 0px 0px;
         width: 100%;
+        height: 120px;
     }
     .myDiary .diaryFoot{
         display: flex;
@@ -272,6 +373,11 @@ export default {
         color: #333333;
         font-size: 12px;
         margin: 6px 0px;
+        /*text-overflow: ellipsis;*/
+        display: -webkit-box;
+        -webkit-box-orient: vertical;
+        -webkit-line-clamp: 1;
+        overflow: hidden;
     }
 
     .myDiary .zanActive{

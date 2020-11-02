@@ -82,6 +82,8 @@ export default {
             pageType:"",//页面类型：vip,specialOffer, diamond
             pageTitle:"项目名称",
 
+            category:null
+
 		}
 	},
 	computed:{
@@ -153,6 +155,11 @@ export default {
                 data.name=this.searchValue
             }
 
+            // 归属分类
+            if(this.category==0||this.category){
+                data.category=this.category
+            }
+
             // 排序
             switch(this.orderBy){
                 case 1:
@@ -199,8 +206,13 @@ export default {
         var pageTitle=this.$router.currentRoute.query.pageTitle;
         if(pageType){
             this.pageType=pageType;
+            
+        }
+        if(pageTitle){
             this.pageTitle=pageTitle;
         }
+
+        this.category=this.$router.currentRoute.query.category;
 
         this.getdata();
     }

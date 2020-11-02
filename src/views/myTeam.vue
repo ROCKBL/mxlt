@@ -5,7 +5,7 @@
 			<van-row class="myTeamInfoUp">
                 <van-col class="myTeamInfoCol" span="8">团队人数</van-col>
                 <van-col class="myTeamInfoCol" span="8">
-                    <van-image round width="50" height="50" class="userPic" :src="userPic" />
+                    <van-image round width="50" height="50" class="userPic" :src="userInfo.avatar" />
                 </van-col>
                 <van-col class="myTeamInfoCol" span="8">团队业绩</van-col>
             </van-row>
@@ -24,7 +24,7 @@
             <div class="myTeamContentRow" v-for="(row,index) in showList">
                 <div class="myTeamContentRowName">{{ row.name }}</div>
                 <div class="myTeamContentRowBottom">
-                    <div class="myTeamContentRowLevel">{{ row.level }}</div>
+                    <div class="myTeamContentRowLevel">{{ getUserLever(row.role) }}</div>
                     <div class="myTeamContentRowDate">{{ row.date }}</div>
                 </div>
 
@@ -39,19 +39,22 @@
 // @ is an alias to /src
 // import HelloWorld from '@/components/HelloWorld.vue'
 
-import Vue from 'vue';
+// import Vue from 'vue';
 import store from '@/store';
 
 // // 手动引入vant单个组件
 // import Button from 'vant/lib/button';
 // import 'vant/lib/button/style';
 
-import Vant from 'vant';
-import 'vant/lib/index.css';
-import { Dialog } from 'vant';
+// import Vant from 'vant';
+// import 'vant/lib/index.css';
+// import { Dialog } from 'vant';
 
-Vue.use(Vant);
-Vue.use(Dialog);
+// Vue.use(Vant);
+// Vue.use(Dialog);
+
+import { mapState } from 'vuex'
+import { ugetConsumerList,ugetTeam } from '@/api/user'
 
 export default {
 	name: '',
@@ -59,23 +62,23 @@ export default {
 	data(){
 		return{
 			zhituiList:[
-                {name:"用户名",level:"普通用户",date:"2020-08-13 16:48:30"},
-                {name:"用户名",level:"普通用户",date:"2020-08-13 16:48:30"},
-                {name:"用户名",level:"普通用户",date:"2020-08-13 16:48:30"},
+                // {name:"用户名",level:"普通用户",date:"2020-08-13 16:48:30"},
+                // {name:"用户名",level:"普通用户",date:"2020-08-13 16:48:30"},
+                // {name:"用户名",level:"普通用户",date:"2020-08-13 16:48:30"},
             ],
             jiantuiList:[
-                {name:"用户名",level:"普通用户",date:"2020-08-13 16:48:30"},
-                {name:"用户名",level:"普通用户",date:"2020-08-13 16:48:30"},
-                {name:"用户名",level:"普通用户",date:"2020-08-13 16:48:30"},
-                {name:"用户名",level:"普通用户",date:"2020-08-13 16:48:30"},
+                // {name:"用户名",level:"普通用户",date:"2020-08-13 16:48:30"},
+                // {name:"用户名",level:"普通用户",date:"2020-08-13 16:48:30"},
+                // {name:"用户名",level:"普通用户",date:"2020-08-13 16:48:30"},
+                // {name:"用户名",level:"普通用户",date:"2020-08-13 16:48:30"},
             ],
-            showList:[],
+            // showList:[],
 
             active:0,
 
-            teamNum:"0",
-            teamEarn:"0",
-            userPic:"https://img.yzcdn.cn/vant/cat.jpeg",
+            // teamNum:"0",
+            teamEarn:0,
+            // userPic:"https://img.yzcdn.cn/vant/cat.jpeg",
 
 		}
 	},
@@ -86,6 +89,19 @@ export default {
         jiantuiTitle(){
             return "直推（"+this.jiantuiList.length+"）"
         },
+        teamNum(){
+            return this.zhituiList.length+this.jiantuiList.length
+        },
+        ...mapState({
+            userInfo(state){ return state.userInfo},
+        }),
+        showList(){
+            if(this.active==0){
+                return this.zhituiList
+            }else{
+                return this.jiantuiList
+            }
+        }
 
 	},
 	watch:{},
@@ -93,30 +109,79 @@ export default {
 		// HelloWorld
 	},
 	methods:{
+        getUserLever(s){
+            var name=""
+            switch(s){
+                case "MEMBER":
+                    name="普通会员"
+                    break;
+                case "VIP_MEMBER":
+                    name="白金会员"
+                    break;
+                case "VIP_MAJORDOMO":
+                    name="VIP 总监"
+                    break;
+                case "DIAMOND_MEMBER":
+                    name="钻石会员"
+                    break;
+                case "BOARD_MEMBER":
+                    name="董事会员"
+                    break;
+            }
+            return name
+        },
 		onClickLeft(){
             this.$router.go(-1)
         },
         tabChange(index){
-            if(index==0){
-                this.showList=[].concat(this.zhituiList)
-                return
-            }
-            if(index==1){
-                this.showList=[].concat(this.jiantuiList)
-                return
-            }
+            // if(index==0){
+            //     this.showList=[].concat(this.zhituiList)
+            //     return
+            // }
+            // if(index==1){
+            //     this.showList=[].concat(this.jiantuiList)
+            //     return
+            // }
         },
         init(){
             // 初始化直推列表，间推列表
             // 初始化团队人数和业绩，个人头像
-            this.showList=[].concat(this.zhituiList)
+            // this.showList=[].concat(this.zhituiList)
+        },
+        getData(){
+            var that=this;
+            ugetConsumerList({
+                getDirect:this.userInfo.id,
+                limit:9999,
+                start:1
+            }).then(function(res){
+                that.zhituiList=res.result.items
+            })
+
+            ugetConsumerList({
+                getIndirect:this.userInfo.id,
+                limit:9999,
+                start:1
+            }).then(function(res){
+                // console.log(res)
+                that.jiantuiList=res.result.items
+            })
+            ugetTeam().then(function(res){
+                // console.log(res)
+                that.teamEarn=res.result.performance
+            })
         }
 	},
 	mounted(){
 
 	},
 	created(){
-        this.init();
+        var that=this
+        store.state.userPromiseFlag.then(function(){
+            that.getData()
+        })
+        
+        // this.init();
     }
 
 }

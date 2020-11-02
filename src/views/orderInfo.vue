@@ -5,17 +5,18 @@
 		<div class="orderAddress" >
 			<div class="blockHead">
   				<div class="blockHeadOrderLabel">订单状态</div>
-  				<div class="blockHeadStatus">{{ status }}</div>
+  				<div class="blockHeadStatus">{{ getStatusStr(orderInfoObj.orderState) }}</div>
   			</div>
   			<div class="divider"></div>
 			<div class="blockBodyItem orderAddressItem">
-				<van-image class="orderAddressImg" round src="https://img.yzcdn.cn/vant/cat.jpeg" />
+				<!-- <van-image class="orderAddressImg" round src="https://img.yzcdn.cn/vant/cat.jpeg" /> -->
+				<van-image class="orderAddressImg" round :src="require('@/assets/imgs/location.png')" />
 				<div class="orderAddressContent">
 					<div class="orderAddressContentUp">
-						<div>{{ address.name }}</div>
-						<div class="orderAddressContentUpPhone">{{ address.phone }}</div>
+						<div>{{ orderInfoObj.addressName }}</div>
+						<div class="orderAddressContentUpPhone">{{ orderInfoObj.addressPhone }}</div>
 					</div>
-					<div class="orderAddressContentDown">{{ address.address }}</div>
+					<div class="orderAddressContentDown">{{ orderInfoObj.addressDetail }}</div>
 				</div>
 			</div>
 		</div>
@@ -26,64 +27,76 @@
   			</div>
   			<div class="divider"></div>
   			<div class="orderItemBody">
-  				<div class="orderItemBodyGoods" v-for="goods in goodsList">
-  					<van-image :src="goods.pic" class="orderItemBodyGoodsPic" />
+  				<div class="orderItemBodyGoods" v-for="goods in orderInfoObj.lines">
+  					<van-image :src="goods.goodsImages" class="orderItemBodyGoodsPic" />
   					<div class="orderItemBodyGoodsRight">
-  						<div class="orderItemBodyGoodsName">{{ goods.name }}</div>
+  						<div class="orderItemBodyGoodsName">{{ goods.goodsName }}</div>
+  						<div style="font-size: 11px;color: #999;">{{ goods.goodsSkuName }}</div>
   						<div class="orderItemBodyGoodsNum">
   							<div class="label">数量</div>
-  							<div class="value">X{{ goods.number }}</div>
+  							<div class="value">X{{ goods.num }}</div>
   						</div>
   						<div class="orderItemBodyGoodsPrice">
   							<div class="label">单价</div>
-  							<div class="value">￥{{ goods.price }}</div>
+  							<div class="value">￥{{ goods.goodsPrice }}</div>
   						</div>
   					</div>
   				</div>
   				<div class="orderItemTotal">
-  					<div class="orderItemTotalNum">共计{{ totalNum }}件商品</div>
-  					<div class="orderItemTotalDeliverFee">（含运费￥{{ deliverFee }}）</div>
+  					<div class="orderItemTotalNum">共计{{ orderInfoObj.lines?orderInfoObj.lines.length:0 }}件商品</div>
+  					<div class="orderItemTotalDeliverFee">（含运费￥{{ orderInfoObj.freight }}）</div>
   					<div class="orderItemTotalLabel">合计：</div>
   					<div class="orderItemTotalUnit">￥</div>
-  					<div class="orderItemTotalMoney">{{ totalprice }}</div>
+  					<div class="orderItemTotalMoney">{{ orderInfoObj.money-orderInfoObj.couponPrice }}</div>
   				</div>
   			</div>
   			<div class="divider"></div>
-  			<div class="blockBodyItem moneyRow">
+  			<!-- <div class="blockBodyItem moneyRow">
   				<div class="blockBodyItemLabel">余额</div>
   				<div class="blockBodyItemValue">-￥{{ balance }}</div>
-  			</div>
-  			<div class="blockBodyItem moneyRow">
+  			</div> -->
+  		<!-- 	<div class="blockBodyItem moneyRow">
   				<div class="blockBodyItemLabel">实际支付</div>
   				<div class="blockBodyItemValue redValue">￥{{ actualPay }}</div>
   			</div>
-  			<div class="divider"></div>
-
+  			<div class="divider"></div> -->
   			<div class="blockBodyItem otherInfoRow">
   				<div class="otherInfoRowlabel">订单编号：</div>
-  				<div class="otherInfoRowValue" >{{ orderNum }}</div>
-  				<van-button class="copyBtn" round type="default" size="small" color="#333333" plain @click="copyOrderNum">复制单号</van-button>
+  				<div class="otherInfoRowValue" >{{ orderInfoObj.orderNo }}</div>
+  			</div>
+  			<div class="blockBodyItem otherInfoRow">
+  				<div class="otherInfoRowlabel">发货单号：</div>
+  				<div class="otherInfoRowValue" v-if="orderInfoObj.expressNumber" >{{ orderInfoObj.expressNumber }}</div>
+  				<div class="otherInfoRowValue" v-else >暂无单号</div>
+  				<van-button class="copyBtn" round type="default" size="small" color="#333333" plain @click="copyOrderNum(orderInfoObj.expressNumber)">复制单号</van-button>
   			</div>
   			<div class="blockBodyItem otherInfoRow">
   				<div class="otherInfoRowlabel">创建时间：</div>
-  				<div class="otherInfoRowValue">{{ createdDate }}</div>
+  				<div class="otherInfoRowValue">{{ new Date(orderInfoObj.createTime).Format("yyyy-MM-dd hh:mm:ss") }}</div>
 
   			</div>
   			<div class="blockBodyItem otherInfoRow">
   				<div class="otherInfoRowlabel">付款时间：</div>
-  				<div class="otherInfoRowValue">-</div>
+  				<div class="otherInfoRowValue" v-if="orderInfoObj.payTime">{{ new Date(orderInfoObj.payTime).Format("yyyy-MM-dd hh:mm:ss") }}</div>
+  				<div class="otherInfoRowValue" v-else>暂无时间</div>
 
   			</div>
   			<div class="blockBodyItem otherInfoRow">
   				<div class="otherInfoRowlabel">发货时间：</div>
-  				<div class="otherInfoRowValue">-</div>
+  				<div class="otherInfoRowValue" v-if="orderInfoObj.deliverTime">{{ new Date(orderInfoObj.deliverTime).Format("yyyy-MM-dd hh:mm:ss") }}</div>
+  				<div class="otherInfoRowValue" v-else>暂无时间</div>
 
   			</div>
   			<div class="blockBodyItem otherInfoRow">
   				<div class="otherInfoRowlabel">完成时间：</div>
-  				<div class="otherInfoRowValue">-</div>
+  				<div class="otherInfoRowValue" v-if="orderInfoObj.completeTime">{{ new Date(orderInfoObj.completeTime).Format("yyyy-MM-dd hh:mm:ss") }}</div>
+  				<div class="otherInfoRowValue" v-else>暂无时间</div>
   			</div>
 
+  			<div class="blockBodyItem otherInfoRow">
+  				<div class="otherInfoRowlabel">用户备注：</div>
+  				<div class="otherInfoRowValue" >{{ orderInfoObj.remake }}</div>
+  			</div>
 		</div>
 
 
@@ -94,43 +107,49 @@
 // @ is an alias to /src
 // import HelloWorld from '@/components/HelloWorld.vue'
 
-import Vue from 'vue';
+// import Vue from 'vue';
 import store from '@/store';
 
 // // 手动引入vant单个组件
 // import Button from 'vant/lib/button';
 // import 'vant/lib/button/style';
 
-import Vant from 'vant';
-import 'vant/lib/index.css';
-import { Dialog } from 'vant';
+// import Vant from 'vant';
+// import 'vant/lib/index.css';
+// import { Dialog } from 'vant';
 
-Vue.use(Vant);
-Vue.use(Dialog);
+// Vue.use(Vant);
+// Vue.use(Dialog);
+
+import { godetail } from '@/api/goods'
 
 export default {
 	name: '',
 	store,
 	data(){
 		return{
-			address:{
-				name:"陈某某",
-				phone:"13858718329",
-				address:"浙江省-温州市-龙湾区浙南云谷X幢"
-			},
-			orderNum:"KB123456789",
-			status:"未支付",
-			goodsList:[
-				{name:"【奥昵玻尿酸0.5ml】守护年 轻的秘密",price:"289.00", pic:"https://img.yzcdn.cn/vant/cat.jpeg",number:1},
-				{name:"【奥昵玻尿酸0.5ml】守护年 轻的秘密",price:"289.00", pic:"https://img.yzcdn.cn/vant/cat.jpeg",number:1}
-			],
-			deliverFee:0,
-			totalNum:2,
-			totalprice:"433.44",
+			// address:{
+			// 	name:"陈某某",
+			// 	phone:"13858718329",
+			// 	address:"浙江省-温州市-龙湾区浙南云谷X幢"
+			// },
+			// orderNum:"KB123456789",
+			// status:"未支付",
+			// goodsList:[
+			// 	{name:"【奥昵玻尿酸0.5ml】守护年 轻的秘密",price:"289.00", pic:"https://img.yzcdn.cn/vant/cat.jpeg",number:1},
+			// 	{name:"【奥昵玻尿酸0.5ml】守护年 轻的秘密",price:"289.00", pic:"https://img.yzcdn.cn/vant/cat.jpeg",number:1}
+			// ],
+			// deliverFee:0,
+			// totalNum:2,
+			// totalprice:"433.44",
 
-			balance:"0.00",
-			actualPay:"289.00",
-			createdDate:"",
+			// balance:"0.00",
+			// actualPay:"289.00",
+			// createdDate:"",
+
+			order:{},
+			orderInfoObj:{},
+
 		}
 	},
 	computed:{
@@ -144,10 +163,28 @@ export default {
 		onClickLeft(){
             this.$router.go(-1)
         },
-        copyOrderNum(){
+        getStatusStr(status){
+			var name=""
+			switch(status){
+				case 0:
+					name="未支付"
+					break
+				case 1:
+					name="待发货"
+					break
+				case 2:
+					name="待收货"
+					break
+				case 3:
+					name="已完成"
+					break
+			}
+			return name
+		},
+        copyOrderNum(num){
         	let transfer = document.createElement('input');
 		    document.body.appendChild(transfer);
-		    transfer.value = this.orderNum;  // 这里表示想要复制的内容
+		    transfer.value = num;  // 这里表示想要复制的内容
 		    transfer.focus();
 		    transfer.select();
 		    if (document.execCommand('copy')) {
@@ -156,6 +193,15 @@ export default {
 		    transfer.blur();
 		    // console.log('复制成功');
 		    document.body.removeChild(transfer);
+        },
+        getData(){
+        	var that=this;
+        	godetail({
+        		orderNo:this.order.orderNo
+        	}).then(function(res){
+        		console.log(res)
+        		that.orderInfoObj=res.result
+        	})
         }
         
 
@@ -163,7 +209,12 @@ export default {
 	mounted(){
 
 	},
-	created(){}
+	created(){
+		var order=this.$router.currentRoute.query.order
+		this.order=JSON.parse(order)
+		this.getData()
+
+	}
 
 }
 </script>
@@ -274,7 +325,7 @@ export default {
 	.orderInfo .orderItemBodyGoodsName{
 		/*margin:0px 10px;*/
 		margin-right: 10px;
-		margin-bottom: 10px;
+		margin-bottom: 2px;
 	}
 	.orderInfo .orderItemBodyGoodsPrice{
 		color: #FE5050;

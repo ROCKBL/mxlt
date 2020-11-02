@@ -5,18 +5,19 @@
 		<div class="goods" v-for="goods in goodsList">
 			<van-icon v-if="ischecked(goods)" class="goodsIcon" name="checked" @click="unCheckGoods(goods)" color="#FF8C34" size="20" />
 			<van-icon v-else class="goodsIcon" name="circle" @click="checkGoods(goods)" size="20" />
-			<van-image class="goodsImg" width="80" height="80" src="https://img.yzcdn.cn/vant/cat.jpeg"  />
+			<van-image class="goodsImg" width="80" height="80" :src="goods.goodsImage"  />
 			<div class="goodsWrap">
-				<div class="goodsName">{{ goods.name }}</div>
-				<div class="goodsBottomRow">
-					<div class="goodsPrice">￥{{ (goods.number*goods.price).toFixed(2) }}</div>
-					<van-stepper class="goodsSteper" v-model="goods.number" />
+				<div class="goodsName">{{ goods.goodsName }}</div>
+                <div style="color: #999;font-size: 11px;">{{ getSkuName(goods.specName) }}</div>
+				<div class="goodsBottomRow" >
+					<div class="goodsPrice">￥{{ (goods.num*goods.goodsPrice).toFixed(2) }}</div>
+					<van-stepper class="goodsSteper" async-change :max="goods.goodsNum" :value="goods.num"  integer @change="stepperChange(goods,arguments)" />
 				</div>
 			</div>
 		</div>
 
 
-		<van-submit-bar class="fixedRow" v-show="mode=='pay'" :price="3050" button-text="去结算" @submit="goPay">
+		<van-submit-bar class="fixedRow" v-show="mode=='pay'" :price="allMoney" button-text="去结算" @submit="goPay">
 		  	<van-checkbox v-model="allChecked" @click="allCheck">全选</van-checkbox>
 		</van-submit-bar>
 		<van-submit-bar class="fixedRow" v-show="mode=='delete'" button-text="删除" @submit="deleteGoods">
@@ -43,6 +44,9 @@ import { Dialog } from 'vant';
 Vue.use(Vant);
 Vue.use(Dialog);
 
+import { mapState } from 'vuex'
+import { gcartdelete,gcartpage,gcartpublish,gcartpublishCoverage } from '@/api/cart'
+
 export default {
 	name: '',
 	store,
@@ -53,19 +57,38 @@ export default {
 			// allChecked:false,
 			checkedAr:[],
 			goodsList:[
-				{name:"【奥昵玻尿酸0.5ml】守护年轻的秘密",number:1,price:289.11,id:1,},
-				{name:"【奥昵玻尿酸0.5ml】守护年轻的秘密",number:1,price:289.11,id:2,}
+				// {name:"【奥昵玻尿酸0.5ml】守护年轻的秘密",number:1,price:289.11,id:1,},
+				// {name:"【奥昵玻尿酸0.5ml】守护年轻的秘密",number:1,price:289.11,id:2,}
 			],
 		}
 	},
 	computed:{
-		allChecked(){
-			if(this.goodsList.length>0&&this.goodsList.length==this.checkedAr.length){
-				return true
-			}
-			return false
+        allMoney(){
+            var money=0;
+            for(var i=0;i<this.checkedAr.length;i++){
+                money+=this.checkedAr[i].num*this.checkedAr[i].goodsPrice*100
+            }
+            return money
+        },
+        allChecked:{
+            get(){
+                if(this.goodsList.length>0&&this.goodsList.length==this.checkedAr.length){
+                    return true
+                }
+                return false
+            },
+            set(newValue){},
+        },
+		// allChecked(){
 
-		}
+		// 	if(this.goodsList.length>0&&this.goodsList.length==this.checkedAr.length){
+		// 		return true
+		// 	}
+		// 	return false
+		// },
+        ...mapState({
+            userInfo(state){ return state.userInfo},
+        })
 	},
 	watch:{},
 	components: {
@@ -85,12 +108,81 @@ export default {
         		return
         	}
         },
+        getSkuName(o){
+            var name=""
+            var ar=[];
+            for(var s in o){
+                ar.push(s+"："+o[s])
+            }
+            name=ar.join("，")
+            return name
+        },
+        stepperChange(goods,arg){
+            var that=this;
+            // console.log(goods)
+            // console.log(arg)
+
+            gcartpublishCoverage({
+                num:arg[0],
+                goodSpecId:goods.goodSpecId
+            }).then(function(res){
+                // console.log(res)
+                that.getData()
+            })
+            .catch(function(e){
+                // 刷新当前页面
+                that.$router.go(0)
+            })
+        },
         goPay(){
         	// 结算checkedAr里的商品
+            console.log(this.checkedAr)
+            if(this.checkedAr.length==0){
+                this.Toast("请选择结算商品")
+                return
+            }
+            this.$router.push({
+                name:"createGoodsOrder",
+                query:{
+                    goods:JSON.stringify(this.checkedAr)
+                }
+            })
+
         },
         deleteGoods(){
         	// 删除checkedAr里的商品
+            var that=this;
+            var ar=this.checkedAr.map(function(o){
+                return o.id
+            })
+            gcartdelete({
+                // ids:JSON.stringify(ar)
+                ids:ar.join(",")
+            }).then(function(res){
+                console.log(res)
+                that.getData()
+            })
+
         },
+        getData(){
+            var that=this;
+            gcartpage({
+                consumerId:this.userInfo.id,
+                limit:9999,
+                start:1,
+            }).then(function(res){
+                that.goodsList.length=0
+                for(var i=0;i<res.result.items.length;i++){
+                    if(res.result.items[i].goodsNum>0){
+                        that.goodsList.push(res.result.items[i])
+                    }
+                    
+                }
+                
+                // console.log(res)
+            })
+        },
+
         ischecked(goods){
         	for(var o of this.checkedAr){
         		if (o.id===goods.id) {
@@ -117,7 +209,6 @@ export default {
         		this.checkedAr=[];
         		return
         	}
-
         	this.checkedAr=[].concat(this.goodsList)
         }
 
@@ -125,7 +216,12 @@ export default {
 	mounted(){
 
 	},
-	created(){}
+	created(){
+        var that=this;
+        store.state.userPromiseFlag.then(function(){
+            that.getData()
+        })
+    }
 
 }
 </script>

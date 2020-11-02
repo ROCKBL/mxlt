@@ -15,6 +15,9 @@ const service = axios.create({
   // timeout: 5000 // request timeout
 })
 
+
+var toast=null
+
 // request interceptor
 service.interceptors.request.use(
   config => {
@@ -32,6 +35,15 @@ service.interceptors.request.use(
 
       config.headers["_ym_token_wx_"]=store.state.token
     }
+
+    if(!toast){
+      toast=Toast.loading({
+        duration: 0, // 持续展示 toast
+        forbidClick: true,
+        message: '数据加载中...',
+      })
+    }
+
     return config
   },
   error => {
@@ -46,6 +58,9 @@ service.interceptors.response.use(
 
   response => {
     const res = response.data
+
+    Toast.clear();
+    toast=null;
 
     if(res.code==1){
       return res
@@ -63,11 +78,17 @@ service.interceptors.response.use(
 
       Toast.fail(res.msg);
 
+      // if(res.msg=="未登录"){
+      //   // console.log(window.location.href)
+      //   store.commit("setRedirectUrl",window.location.href)
+      // }
+      if(res.msg=="未登录"){
+        window.location.href="http://www.meixiangletao.com/user/loginwechat"
+      }
+
+
       return Promise.reject(new Error(res.msg))
     }
-
-
-
 
     
   },
@@ -78,6 +99,10 @@ service.interceptors.response.use(
     //   type: 'error',
     //   duration: 5 * 1000
     // })
+    Toast.clear();
+    toast=null;
+
+    console.log(error.message)
 
     Toast.fail(error.message);
     return Promise.reject(error)
